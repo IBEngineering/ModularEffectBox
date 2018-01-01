@@ -7,8 +7,13 @@
 
 #include "state_test.h"
 
-TestState::TestState() {
-	// TODO Auto-generated constructor stub
+void TestState::setup()
+{
+
+}
+
+void TestState::loop()
+{
 
 }
 

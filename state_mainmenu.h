@@ -8,6 +8,7 @@
 #ifndef STATE_MAINMENU_H_
 #define STATE_MAINMENU_H_
 
+#include <elapsedMillis.h>
 #include "state_state.h"
 
 class MainMenuState: public ProgramState {
@@ -22,6 +23,10 @@ public:
 	void setup();
 	void loop();
 	virtual ~MainMenuState();
+
+private:
+	elapsedMillis time;
+	uint8_t lastselect=-1, currselect=-1;
 };
 
 #endif /* STATE_MAINMENU_H_ */

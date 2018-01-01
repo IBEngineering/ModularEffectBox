@@ -19,6 +19,10 @@ public:
 				EncoderCapsule *encc3,
 				StateManager *states)
 				:ProgramState(u8g2, encc1, encc2, encc3, states, "TEST") {}
+
+	void setup();
+	void loop();
+
 	virtual ~TestState();
 };
 

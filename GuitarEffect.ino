@@ -10,6 +10,7 @@
 #include "state_display.h"
 #include "state_editor.h"
 #include "state_mainmenu.h"
+#include "state_test.h"
 #include <string.h>
 #include <U8g2lib.h>
 #include <Wire.h>
@@ -70,6 +71,7 @@ void setup()
 	stateManager.states[0] = new MainMenuState(&u8g2, &encc1, &encc2, &encc3, &stateManager);
 	stateManager.states[1] = new DisplayState(&u8g2, &encc1, &encc2, &encc3, &stateManager);
 	stateManager.states[2] = new EditorState(&u8g2, &encc1, &encc2, &encc3, &stateManager);
+	stateManager.states[3] = new TestState(&u8g2, &encc1, &encc2, &encc3, &stateManager);
 	stateManager.setCurrentState(0);
 
 	//Set default value for ecnoder 2 we use it for freq
@@ -121,6 +123,7 @@ void setup()
 	addModule(3);
 
 	u8g2.clearBuffer();
+	u8g2.setFont(u8g2_font_4x6_tr);
 	stateManager.setup();
 }
 
