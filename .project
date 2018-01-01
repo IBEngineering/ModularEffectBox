@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>GuitarEffect</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>io.sloeber.core.inoToCpp</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.cdt.managedbuilder.core.genmakebuilder</name>
+			<triggers>clean,full,incremental,</triggers>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.cdt.managedbuilder.core.ScannerConfigBuilder</name>
+			<triggers>full,incremental,</triggers>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.cdt.core.cnature</nature>
+		<nature>org.eclipse.cdt.core.ccnature</nature>
+		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
+		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
+		<nature>io.sloeber.arduinonature</nature>
+	</natures>
+	<linkedResources>
+		<link>
+			<name>core/core</name>
+			<type>2</type>
+			<location>C:/Program Files (x86)/Arduino/hardware/teensy/avr/cores/teensy3</location>
+		</link>
+		<link>
+			<name>libraries/Audio</name>
+			<type>2</type>
+			<location>C:/Program Files (x86)/Arduino/hardware/teensy/avr/libraries/Audio</location>
+		</link>
+		<link>
+			<name>libraries/Bounce</name>
+			<type>2</type>
+			<location>C:/Program Files (x86)/Arduino/hardware/teensy/avr/libraries/Bounce</location>
+		</link>
+		<link>
+			<name>libraries/Encoder</name>
+			<type>2</type>
+			<location>C:/Program Files (x86)/Arduino/hardware/teensy/avr/libraries/Encoder</location>
+		</link>
+		<link>
+			<name>libraries/SD</name>
+			<type>2</type>
+			<location>C:/Program Files (x86)/Arduino/hardware/teensy/avr/libraries/SD</location>
+		</link>
+		<link>
+			<name>libraries/SPI</name>
+			<type>2</type>
+			<location>C:/Program Files (x86)/Arduino/hardware/teensy/avr/libraries/SPI</location>
+		</link>
+		<link>
+			<name>libraries/SerialFlash</name>
+			<type>2</type>
+			<location>C:/Program Files (x86)/Arduino/hardware/teensy/avr/libraries/SerialFlash</location>
+		</link>
+		<link>
+			<name>libraries/U8g2</name>
+			<type>2</type>
+			<location>C:/Program Files (x86)/Arduino/libraries/U8g2</location>
+		</link>
+		<link>
+			<name>libraries/Wire</name>
+			<type>2</type>
+			<location>C:/Program Files (x86)/Arduino/hardware/teensy/avr/libraries/Wire</location>
+		</link>
+	</linkedResources>
+</projectDescription>
