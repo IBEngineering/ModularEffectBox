@@ -13,10 +13,11 @@
 //	this->currentState = states; //actually &states[0], but thats longer
 //}
 
-StateManager::StateManager(ProgramState **states)
+StateManager::StateManager(ProgramState **states, uint8_t size)
 {
 	this->states = states;
 	this->currentState = states[0]; //actually &states[0], but thats longer
+	this->size = size;
 }
 void StateManager::setCurrentState(uint8_t state)
 {

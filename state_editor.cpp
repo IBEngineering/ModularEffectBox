@@ -18,21 +18,30 @@ void EditorState::setup()
 
 void EditorState::loop()
 {
-	int32_t select = encc3->r.read()/4;
+	if(m == NULL) m = getModule(0);	// Get first module to prevent npe
+
+	currselect = -1;	//Impossible
+	int32_t read = encc3->r.read()/4;
+	if(read >= 0 && read <= 16)	// Currently hardcoded to 16
+	{
+		currselect = read;
+	}
 
 	if(PRESSEDP(encc1) > 0 || PRESSEDP(encc2) > 0)
 	{
 		u8g2->clearBuffer();
 		stateManager->setCurrentState(0);
+		return;
 	}
-	else if(PRESSEDP(encc3) > 0 && select >= 0)
+	else if(PRESSEDP(encc3) > 0 && currselect >= 0)
 	{
 		zoomed = !zoomed;
-		onZoomedIn(select);
+		onZoomedIn();
 	}
-	else if(zoomed)
+
+	if(zoomed)
 	{
-		whileZoomedIn(select);
+		whileZoomedIn();
 	}
 	else
 	{
@@ -44,7 +53,7 @@ void EditorState::loop()
 		y = 32;	//Middle
 
 		w = drawModule(x,y,currentModule,true);
-		if(currentModule->id == select)
+		if(currentModule->id == currselect)
 		{
 			u8g2->setDrawColor(2);
 			u8g2->drawBox(x+1, y-3, w+1, 7);
@@ -56,7 +65,7 @@ void EditorState::loop()
 		y = 32;
 
 		w = drawModule(x,y,currentModule,true);
-		if(currentModule->id == select)
+		if(currentModule->id == currselect)
 		{
 			u8g2->setDrawColor(2);
 			u8g2->drawBox(x+1, y-3, w+1, 7);
@@ -68,7 +77,7 @@ void EditorState::loop()
 		y = 32;
 
 		w = drawModule(x,y,currentModule,true);
-		if(currentModule->id == select)
+		if(currentModule->id == currselect)
 		{
 			u8g2->setDrawColor(2);
 			u8g2->drawBox(x+1, y-3, w+1, 7);
@@ -80,61 +89,80 @@ void EditorState::loop()
 		y = 32;
 
 		w = drawModule(x,y,currentModule,false);
-		if(currentModule->id == select)
+		if(currentModule->id == currselect)
 		{
 			u8g2->setDrawColor(2);
 			u8g2->drawBox(x+1, y-3, w+1, 7);
 			u8g2->setDrawColor(1);
 		}
 	}
+
+	lastselect = currselect;
 }
 
-void EditorState::onZoomedIn(int32_t select)
+void EditorState::onZoomedIn()
 {
-//	uint8_t n = 0;
-//	uint8_t i = 0;
-//
-//	u8g2->clearBuffer();
-//	u8g2->setCursor(0, n+=5);
-//	u8g2->print(getModule(select)->proto->title);
-//	u8g2->setCursor(0, n+=5);
-//	u8g2->print("----");
-//	for(i = 0; i < getModule(select)->proto->valueSize; i++)
-//	{
-//		u8g2->setCursor(0, n+=6);	// Give it an extra pixel for spacing
-//		u8g2->print(getModule(select)->proto->names[i]);
-//		u8g2->setCursor(100, n);	//28 px should be enough
-//		u8g2->print(getModule(select)->values[i]);
-//	}
-}
+	// Update currently selected module
+	// Also 'locks' it
+	m = getModule(currselect);
 
-void EditorState::whileZoomedIn(int32_t select)
-{
-	uint8_t n = 0;
-	uint8_t i = 0;
+	uint8_t n = 0;	// cursor position
+	uint8_t i = 0;	// iterated value
 
+	u8g2->enableUTF8Print();
 	u8g2->clearBuffer();
-	u8g2->setCursor(0, n+=5);
-	u8g2->print(getModule(select)->proto->title);
-	u8g2->setCursor(0, n+=5);
+	u8g2->setCursor(1, n+=5);
+	u8g2->print(m->proto->title);
+	u8g2->setCursor(1, n+=5);
 	u8g2->print("----");
-	for(i = 0; i < getModule(select)->proto->valueSize; i++)
+	for(i = 0; i < m->proto->valueSize; i++)
 	{
-		u8g2->setCursor(0, n+=6);	// Give it an extra pixel for spacing
-		u8g2->print(getModule(select)->proto->names[i]);
+		u8g2->setCursor(1, n+=6);	// Give it an extra pixel for spacing
+		u8g2->print(m->proto->names[i]);
 		u8g2->setCursor(100, n);	//28 px should be enough
-		u8g2->print(getModule(select)->values[i]);
+		u8g2->print(m->values[i]);
 	}
 
-	if(select > 0 && select < getModule(select)->proto->valueSize)
-	{
-		u8g2->setDrawColor(2);
-		u8g2->drawBox(0, 10, 128, 7);
-		u8g2->setDrawColor(1);
-	}
+	encc3->r.write(0);
+
+	// Make sure to have change
+	currselect = 0;
+	lastselect = -1;
 }
 
-void EditorState::onZoomedOut(int32_t select)
+void EditorState::whileZoomedIn()
+{
+	// Only clear a small area for debug
+	u8g2->setDrawColor(0);
+	u8g2->drawBox(0, 40, 128, 24);
+	u8g2->setDrawColor(1);
+
+	char buf[40];
+
+	if(currselect != lastselect)	// change?
+	{
+		// Remove last select
+		if(lastselect >= 0 && lastselect < m->proto->valueSize)
+		{
+			u8g2->setDrawColor(2);
+			u8g2->drawBox(0, 10 + 6*lastselect, 128, 7);
+			u8g2->setDrawColor(1);
+		}
+
+		// Set new select
+		if(currselect >= 0 && currselect < m->proto->valueSize)
+		{
+			u8g2->setDrawColor(2);
+			u8g2->drawBox(0, 10 + 6*currselect, 128, 7);
+			u8g2->setDrawColor(1);
+		}
+	}
+
+	sprintf(buf, "c:%d, l:%d", currselect, lastselect);
+	u8g2->drawStr(0, 58, buf);
+}
+
+void EditorState::onZoomedOut()
 {
 
 }

@@ -28,10 +28,12 @@ public:
 	virtual ~EditorState();
 private:
 	bool zoomed = false;
+	uint8_t lastselect=-1, currselect=-1;
+	Module *m = NULL;	// !!!
 
-	void onZoomedIn(int32_t select);
-	void whileZoomedIn(int32_t select);
-	void onZoomedOut(int32_t select);
+	void onZoomedIn();
+	void whileZoomedIn();
+	void onZoomedOut();
 	uint8_t drawModule(int x, int y, Module *module, bool line);
 };
 

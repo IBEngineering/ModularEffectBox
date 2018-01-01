@@ -7,15 +7,14 @@
 
 #include "state_mainmenu.h"
 
+bool logo = true;
+
 void MainMenuState::setup()
 {
-	u8g2->setFont(u8g2_font_6x10_mr);
+	if(logo)
+	{
 
-	u8g2->drawBox(0, 13, 4, 3);
-	u8g2->drawStr(5, 17, "Graph");
-
-	u8g2->drawBox(0, 48, 4, 3);
-	u8g2->drawStr(5, 52, "Editor");
+	}
 }
 
 void MainMenuState::loop()

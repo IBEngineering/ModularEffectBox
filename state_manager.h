@@ -16,9 +16,10 @@ class StateManager {
 public:
 	ProgramState **states;
 	ProgramState *currentState;
+	uint8_t size;
 
 //	StateManager(uint8_t size);
-	StateManager(ProgramState **states);
+	StateManager(ProgramState **states, uint8_t size);
 
 	void setCurrentState(uint8_t state);
 	void setup();

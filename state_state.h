@@ -15,13 +15,6 @@
 class StateManager;
 
 class ProgramState {
-protected:
-	EncoderCapsule *encc1;
-	EncoderCapsule *encc2;
-	EncoderCapsule *encc3;
-	StateManager *stateManager;
-	U8G2_ST7920_128X64_F_SW_SPI *u8g2;
-
 public:
 	const char *title;
 
@@ -38,6 +31,13 @@ public:
 	virtual void loop() =0;
 
 	virtual ~ProgramState();
+
+protected:
+	EncoderCapsule *encc1;
+	EncoderCapsule *encc2;
+	EncoderCapsule *encc3;
+	StateManager *stateManager;
+	U8G2_ST7920_128X64_F_SW_SPI *u8g2;
 };
 
 #endif /* STATE_STATE_H_ */

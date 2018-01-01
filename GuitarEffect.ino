@@ -46,7 +46,7 @@ const int myInput = AUDIO_INPUT_LINEIN;
 U8G2_ST7920_128X64_F_SW_SPI u8g2(U8G2_R2, PIN_CLOCK, PIN_DATA, PIN_CS);
 //U8G2_ST7920_128X64_F_HW_SPI u8g2(U8G2_R2, PIN_CS);
 
-StateManager stateManager = StateManager(new ProgramState*[3]);
+StateManager stateManager = StateManager(new ProgramState*[4], 4);
 //MainMenuState mainMenuState = ;
 //DisplayState displayState = ;
 //EditorState editorState = ;
@@ -95,7 +95,7 @@ void setup()
 	// IN
 	addProto(new ModuleProto("IN", 0, NULL, 0, 1));
 	// FIL
-	const char *namesFIL[] = {"frequency", "resonance", "octave control"};
+	const char *namesFIL[] = {"frequency", "resonance", "octave"};
 	addProto(new ModuleProto("FIL", 3, namesFIL, 1, 1));
 	// REV
 	const char *namesREV[]  = {"reverb time"};
@@ -153,14 +153,4 @@ void loop()
 	filter1.resonance(getModule(1)->values[1]);
 	filter1.octaveControl(getModule(1)->values[2]);
 	reverb1.reverbTime(getModule(2)->values[0]);
-}
-
-void setupGraphDisplay()
-{
-	u8g2.drawStr(0, 20, "Graph not supported!");
-}
-
-void loopGraphDisplay()
-{
-
 }
