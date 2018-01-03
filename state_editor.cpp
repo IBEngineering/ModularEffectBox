@@ -36,7 +36,8 @@ void EditorState::loop()
 	else if(PRESSEDP(encc3) > 0 && currselect >= 0)
 	{
 		zoomed = !zoomed;
-		onZoomedIn();
+		if(zoomed)	onZoomedIn();
+		else		onZoomedOut();
 	}
 
 	if(zoomed)
@@ -120,7 +121,7 @@ void EditorState::onZoomedIn()
 		u8g2->setCursor(1, n+=6);	// Give it an extra pixel for spacing
 		u8g2->print(m->proto->names[i]);
 		u8g2->setCursor(100, n);	//28 px should be enough
-		u8g2->print(m->values[i]);
+		u8g2->print(m->values[i].value());
 	}
 
 	encc3->r.write(0);
@@ -132,31 +133,82 @@ void EditorState::onZoomedIn()
 
 void EditorState::whileZoomedIn()
 {
+	/*
+	 * If there's a change in selection,
+	 * deselect the last one and select
+	 * the current one
+	 */
+	if(currselect != lastselect)
+	{
+		u8g2->setDrawColor(2);
+		// Remove last select
+		if(lastselect >= 0 && lastselect < m->proto->valueSize)
+		{
+			u8g2->drawBox(0, 10 + 6*lastselect, 128, 7);
+		}
+
+		// Set new select
+		if(currselect >= 0 && currselect < m->proto->valueSize)
+		{
+			u8g2->drawBox(0, 10 + 6*currselect, 128, 7);
+		}
+		u8g2->setDrawColor(1);
+	}
+
+	/*
+	 * If the value is to be changed, erase
+	 * letters and draw them again.
+	 */
+
+	if(currselect >= 0 && currselect < m->proto->valueSize)	// is valid?
+	{
+		/*
+		 * The first button does 1 step
+		 */
+		if(encc1->r.read()/4 != 0)
+		{
+			// Set value
+			m->values[currselect] += encc1->r.read()/4;
+			encc1->r.write(0);
+
+			// Erase area
+//			u8g2->setDrawColor(1);
+			u8g2->drawBox(100, 10 + 6*currselect, 28, 7);
+
+			//Draw text in
+			u8g2->setDrawColor(0);
+			u8g2->setCursor(100, 16 + 6*currselect);	//28 px should be enough
+			u8g2->print(m->values[currselect].value());
+			u8g2->setDrawColor(1);
+		}
+
+		/*
+		 * The second button does 10 steps
+		 */
+		if(encc2->r.read()/4 != 0)
+		{
+			// Set value
+			m->values[currselect] += encc2->r.read()/4 * 10;
+			encc2->r.write(0);
+
+			// Erase area
+//			u8g2->setDrawColor(1);
+			u8g2->drawBox(100, 10 + 6*currselect, 28, 7);
+
+			//Draw text in
+			u8g2->setDrawColor(0);
+			u8g2->setCursor(100, 16 + 6*currselect);	//28 px should be enough
+			u8g2->print(m->values[currselect].value());
+			u8g2->setDrawColor(1);
+		}
+	}
+
 	// Only clear a small area for debug
 	u8g2->setDrawColor(0);
 	u8g2->drawBox(0, 40, 128, 24);
 	u8g2->setDrawColor(1);
 
 	char buf[40];
-
-	if(currselect != lastselect)	// change?
-	{
-		// Remove last select
-		if(lastselect >= 0 && lastselect < m->proto->valueSize)
-		{
-			u8g2->setDrawColor(2);
-			u8g2->drawBox(0, 10 + 6*lastselect, 128, 7);
-			u8g2->setDrawColor(1);
-		}
-
-		// Set new select
-		if(currselect >= 0 && currselect < m->proto->valueSize)
-		{
-			u8g2->setDrawColor(2);
-			u8g2->drawBox(0, 10 + 6*currselect, 128, 7);
-			u8g2->setDrawColor(1);
-		}
-	}
 
 	sprintf(buf, "c:%d, l:%d", currselect, lastselect);
 	u8g2->drawStr(0, 58, buf);

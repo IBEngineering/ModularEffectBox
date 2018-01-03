@@ -23,15 +23,15 @@
 AudioInputI2S            i2s1;           //xy=265,455
 AudioAnalyzeRMS          rms1;           //xy=444,354
 AudioFilterStateVariable filter1;        //xy=476,464
-AudioEffectReverb        reverb1;        //xy=663,449
+AudioEffectReverb        reverb1;        //xy=689,315
 AudioOutputI2S           i2s2;           //xy=821,519
 AudioConnection          patchCord1(i2s1, 0, rms1, 0);
 AudioConnection          patchCord2(i2s1, 0, filter1, 0);
-AudioConnection          patchCord3(filter1, 1, reverb1, 0);
-AudioConnection          patchCord4(reverb1, 0, i2s2, 0);
-AudioConnection          patchCord5(reverb1, 0, i2s2, 1);
+AudioConnection          patchCord3(filter1, 0, i2s2, 0);
+AudioConnection          patchCord4(filter1, 0, i2s2, 1);
 AudioControlSGTL5000     sgtl5000_1;     //xy=325,273
 // GUItool: end automatically generated code
+
 
 #define ENCODER1BUTTON	26
 #define ENCODER2BUTTON	29
@@ -97,11 +97,9 @@ void setup()
 	// IN
 	addProto(new ModuleProto("IN", 0, NULL, 0, 1));
 	// FIL
-	const char *namesFIL[] = {"frequency", "resonance", "octave"};
-	addProto(new ModuleProto("FIL", 3, namesFIL, 1, 1));
+	addProto(new ModuleProto("FIL", 3, new const char *[3] {"frequency", "resonance", "octave"}, 1, 1));
 	// REV
-	const char *namesREV[]  = {"reverb time"};
-	addProto(new ModuleProto("REV", 1, namesREV, 1, 1));
+	addProto(new ModuleProto("REV", 1, new const char *[1] {"reverb time"}, 1, 1));
 	// OUT
 	addProto(new ModuleProto("OUT", 0, NULL, 1, 0));
 
@@ -112,13 +110,13 @@ void setup()
 	// FIL
 	addModule(1);
 	getModule(1)->outputs[0] = 2;
-	getModule(1)->values[0] = 440;	// 440 Hz	| [ 20 , 1000 ]
-	getModule(1)->values[1] = 0.7;	// 0.7		| [ 0.7, 5.0 ]
-	getModule(1)->values[2] = 2.5;	// 2.5 octs	| [ 0 , 7 ]
+	getModule(1)->values[0] = BoundedValue(20.0, 1.0, 800.0, 440.0);
+	getModule(1)->values[1] = BoundedValue(0.7, .1, 5.0, 0.7);
+	getModule(1)->values[2] = BoundedValue(0.0, 0.2, 7.0);
 	// REV
 	addModule(2);
 	getModule(2)->outputs[0] = 3;
-	getModule(2)->values[0] = 0.0002;	// 0.0002 sec
+	getModule(2)->values[0] = BoundedValue(0.0, 0.1, 5.0, 0.0);
 	// OUT
 	addModule(3);
 
@@ -152,8 +150,8 @@ void loop()
 	u8g2.sendBuffer();
 
 	//After drawing and recieving inputs, update audio
-	filter1.frequency(getModule(1)->values[0]);
-	filter1.resonance(getModule(1)->values[1]);
-	filter1.octaveControl(getModule(1)->values[2]);
-	reverb1.reverbTime(getModule(2)->values[0]);
+	filter1.frequency(getModule(1)->values[0].value());
+	filter1.resonance(getModule(1)->values[1].value());
+	filter1.octaveControl(getModule(1)->values[2].value());
+	reverb1.reverbTime(getModule(2)->values[0].value());
 }

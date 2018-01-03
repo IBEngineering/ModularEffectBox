@@ -10,6 +10,7 @@
 
 #include "model_module_prototype.h"
 #include "model_module.h"
+#include "model_value.h"
 #include <string.h>
 #include <stdint.h>
 

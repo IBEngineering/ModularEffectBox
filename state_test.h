@@ -2,12 +2,13 @@
  * state_test.h
  *
  *  Created on: 1 jan. 2018
- *      Author: borgert
+ *      Author: MisterCavespider
  */
 
 #ifndef STATE_TEST_H_
 #define STATE_TEST_H_
 
+#include "model_value.h"
 #include "state_state.h"
 
 class TestState : public ProgramState {
@@ -18,12 +19,14 @@ public:
 				EncoderCapsule *encc2,
 				EncoderCapsule *encc3,
 				StateManager *states)
-				:ProgramState(u8g2, encc1, encc2, encc3, states, "TEST") {}
+				:ProgramState(u8g2, encc1, encc2, encc3, states, "TEST") {bv = BoundedValue(0.0, 0.1, 5.0);}
 
 	void setup();
 	void loop();
 
 	virtual ~TestState();
+private:
+	BoundedValue bv;
 };
 
 #endif /* STATE_TEST_H_ */
