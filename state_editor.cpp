@@ -61,7 +61,7 @@ void EditorState::loop()
 			u8g2->setDrawColor(1);
 		}
 
-		currentModule = getModule(currentModule->outputs[0]);
+		currentModule = getModule(currentModule->outputs[0][0]);
 		x = x+2+w+8;
 		y = 32;
 
@@ -73,7 +73,7 @@ void EditorState::loop()
 			u8g2->setDrawColor(1);
 		}
 
-		currentModule = getModule(currentModule->outputs[0]);
+		currentModule = getModule(currentModule->outputs[0][0]);
 		x = x+2+w+8;
 		y = 32;
 
@@ -85,7 +85,7 @@ void EditorState::loop()
 			u8g2->setDrawColor(1);
 		}
 
-		currentModule = getModule(currentModule->outputs[0]);
+		currentModule = getModule(currentModule->outputs[0][0]);
 		x = x+2+w+8;
 		y = 32;
 
@@ -116,7 +116,7 @@ void EditorState::onZoomedIn()
 	u8g2->print(m->proto->title);
 	u8g2->setCursor(1, n+=5);
 	u8g2->print("----");
-	for(i = 0; i < m->proto->valueSize; i++)
+	for(i = 0; i < m->proto->valueCount; i++)
 	{
 		u8g2->setCursor(1, n+=6);	// Give it an extra pixel for spacing
 		u8g2->print(m->proto->names[i]);
@@ -142,13 +142,13 @@ void EditorState::whileZoomedIn()
 	{
 		u8g2->setDrawColor(2);
 		// Remove last select
-		if(lastselect >= 0 && lastselect < m->proto->valueSize)
+		if(lastselect >= 0 && lastselect < m->proto->valueCount)
 		{
 			u8g2->drawBox(0, 10 + 6*lastselect, 128, 7);
 		}
 
 		// Set new select
-		if(currselect >= 0 && currselect < m->proto->valueSize)
+		if(currselect >= 0 && currselect < m->proto->valueCount)
 		{
 			u8g2->drawBox(0, 10 + 6*currselect, 128, 7);
 		}
@@ -160,7 +160,7 @@ void EditorState::whileZoomedIn()
 	 * letters and draw them again.
 	 */
 
-	if(currselect >= 0 && currselect < m->proto->valueSize)	// is valid?
+	if(currselect >= 0 && currselect < m->proto->valueCount)	// is valid?
 	{
 		/*
 		 * The first button does 1 step

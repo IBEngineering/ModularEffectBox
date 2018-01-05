@@ -106,16 +106,16 @@ void setup()
 	allocateForModules(4);
 	// IN
 	addModule(0);
-	getModule(0)->outputs[0] = 1;
+	getModule(0)->outputs[0][0] = 1;
 	// FIL
 	addModule(1);
-	getModule(1)->outputs[0] = 2;
+	getModule(1)->outputs[0][0] = 2;
 	getModule(1)->values[0] = BoundedValue(20.0, 1.0, 800.0, 440.0);
 	getModule(1)->values[1] = BoundedValue(0.7, .1, 5.0, 0.7);
 	getModule(1)->values[2] = BoundedValue(0.0, 0.2, 7.0);
 	// REV
 	addModule(2);
-	getModule(2)->outputs[0] = 3;
+	getModule(2)->outputs[0][0] = 3;
 	getModule(2)->values[0] = BoundedValue(0.0, 0.1, 5.0, 0.0);
 	// OUT
 	addModule(3);

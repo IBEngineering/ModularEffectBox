@@ -21,15 +21,15 @@ public:
 	ModuleProto(const char* title, uint8_t valueSize, const char **names, uint8_t inputSize, uint8_t outputSize)
 	{
 		this->title = title;
-		this->valueSize = valueSize;
+		this->valueCount = valueSize;
 		this->names = names;
-		this->inputSize = inputSize;
-		this->outputSize = outputSize;
+		this->inputCount = inputSize;
+		this->outputCount = outputSize;
 	}
 
 	const char* title;
 	const char **names;
-	uint8_t valueSize, inputSize, outputSize;
+	uint8_t valueCount, inputCount, outputCount;
 };
 
 #endif /* MODEL_MODULE_PROTOTYPE_H_ */

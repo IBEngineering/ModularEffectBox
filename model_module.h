@@ -20,7 +20,7 @@ public:
 		id = -1;	//impossible
 		values = new BoundedValue[1];
 		inputs = (uint8_t *)malloc(sizeof(uint8_t));
-		outputs = (uint8_t *)malloc(sizeof(uint8_t));
+		outputs = (uint8_t **)malloc(sizeof(uint8_t));
 		proto = 0;
 	}
 
@@ -28,18 +28,18 @@ public:
 	{
 		this->proto = proto;
 		this->id = id;
-		values = new BoundedValue[proto->valueSize];
-		inputs = (uint8_t *)malloc(sizeof(uint8_t)*proto->inputSize);
-		outputs = (uint8_t *)malloc(sizeof(uint8_t)*proto->outputSize);
+		values = new BoundedValue[proto->valueCount];
+		inputs = (uint8_t *)malloc(sizeof(uint8_t)*proto->inputCount);
+		outputs = (uint8_t **)malloc(sizeof(uint8_t)*proto->outputCount);
 	}
 
-	Module(ModuleProto *proto, uint8_t id, BoundedValue *values, uint8_t* inputs, uint8_t* outputs);
+	Module(ModuleProto *proto, uint8_t id, BoundedValue *values, uint8_t* inputs, uint8_t** outputs);
 
 	ModuleProto *proto;
 	uint8_t id;
 	BoundedValue *values;
-	uint8_t* inputs;
-	uint8_t* outputs;
+	uint8_t* inputs;		// An array of input ports, each with one link
+	uint8_t** outputs;		// An array of input ports, each with several outputs
 };
 
 #endif /* MODEL_MODULE_H_ */
