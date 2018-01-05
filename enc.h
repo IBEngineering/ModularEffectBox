@@ -2,7 +2,7 @@
  * enc.h
  *
  *  Created on: 29 dec. 2017
- *      Author: borgert
+ *      Author: MisterCavespider
  */
 
 #ifndef ENC_H_
@@ -14,6 +14,11 @@
 
 #define PRESSEDV(enc)	enc.c.deltaread()
 #define PRESSEDP(enc)	enc->c.deltaread()
+
+#define	READV(enc)		enc.r.read()
+#define READP(enc)		enc->r.read()
+#define WRITEV(enc,v)	enc.r.write(v)
+#define WRITEP(enc,v)	enc->r.write(v)
 
 class EncoderButton {
 public:

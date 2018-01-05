@@ -24,11 +24,11 @@ void TestState::loop()
 		return;
 	}
 
-	read = encc1->r.read()/4;
-	if(encc1->r.read()/4 != 0)
+	read = READP(encc1)/4;
+	if(read != 0)
 	{
-		bv += encc1->r.read()/4;
-		encc1->r.write(0);
+		bv += read;
+		WRITEP(encc1,0);
 	}
 	read = encc2->r.read()/4;
 	if(encc2->r.read()/4 != 0)

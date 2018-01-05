@@ -11,9 +11,9 @@ void EditorState::setup()
 {
 	u8g2->setFont(u8g2_font_4x6_tr);
 
-	encc1->r.write(0);
-	encc2->r.write(0);
-	encc3->r.write(0);
+	WRITEP(encc1, 0);
+	WRITEP(encc2, 0);
+	WRITEP(encc3, 0);
 }
 
 void EditorState::loop()
@@ -21,7 +21,7 @@ void EditorState::loop()
 	if(m == NULL) m = getModule(0);	// Get first module to prevent npe
 
 	currselect = -1;	//Impossible
-	int32_t read = encc3->r.read()/4;
+	int32_t read = READP(encc3)/4;
 	if(read >= 0 && read <= 16)	// Currently hardcoded to 16
 	{
 		currselect = read;
@@ -50,7 +50,7 @@ void EditorState::loop()
 		uint8_t x,y,w;
 
 		Module *currentModule = getModule(0);	//TODO: hacky
-		x = 0 - encc1->r.read()/4 - encc2->r.read()/4;
+		x = 0 - READP(encc1)/4 - READP(encc2)/4;
 		y = 32;	//Middle
 
 		w = drawModule(x,y,currentModule,true);
@@ -165,10 +165,10 @@ void EditorState::whileZoomedIn()
 		/*
 		 * The first button does 1 step
 		 */
-		if(encc1->r.read()/4 != 0)
+		if(READP(encc1)/4 != 0)
 		{
 			// Set value
-			m->values[currselect] += encc1->r.read()/4;
+			m->values[currselect] += READP(encc1)/4;
 			encc1->r.write(0);
 
 			// Erase area
@@ -185,10 +185,10 @@ void EditorState::whileZoomedIn()
 		/*
 		 * The second button does 10 steps
 		 */
-		if(encc2->r.read()/4 != 0)
+		if(READP(encc2)/4 != 0)
 		{
 			// Set value
-			m->values[currselect] += encc2->r.read()/4 * 10;
+			m->values[currselect] += READP(encc2)/4 * 10;
 			encc2->r.write(0);
 
 			// Erase area

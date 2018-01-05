@@ -2,7 +2,7 @@
  * enc.cpp
  *
  *  Created on: 29 dec. 2017
- *      Author: borgert
+ *      Author: MisterCavespider
  */
 
 #include "enc.h"
