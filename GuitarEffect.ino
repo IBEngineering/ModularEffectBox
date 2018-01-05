@@ -141,9 +141,9 @@ void loop()
 	 */
 	stateManager.currentState->loop();
 
-	char buf[40];
-	sprintf(buf, "%d->%d:%d|%d", encc3.c.lastread(), encc3.c.currentread(), encc3.c.deltaread(), encc3.r.read());
-	u8g2.drawStr(0, 64, buf);
+//	char buf[40];
+//	sprintf(buf, "%d->%d:%d|%d", encc3.c.lastread(), encc3.c.currentread(), encc3.c.deltaread(), encc3.r.read());
+//	u8g2.drawStr(0, 64, buf);
 //	sprintf(buf, "state=%s", stateManager.currentState->title);
 //	u8g2.drawStr(0, 54, buf);
 
