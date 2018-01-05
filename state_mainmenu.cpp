@@ -37,6 +37,8 @@ static const uint8_t ibe_med_bits[] = {
    0x03, 0xfc, 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
+// Name of project + formatting
+#define PROJECT_STRING	"-==[ModBox]==-"
 
 bool logo = true;
 
@@ -50,16 +52,18 @@ void MainMenuState::setup()
 	{
 		u8g2->drawXBMP(32, 8, ibe_med_width, ibe_med_height, ibe_med_bits);
 
-		u8g2->drawStr(50, 50, "{title}");
+		uint8_t w = u8g2->getStrWidth(PROJECT_STRING);
+		u8g2->setCursor((128-(w+1))/2, 50);
+		u8g2->print(PROJECT_STRING);
 	}
 	else
 	{
 		uint8_t n = 14;
 		uint8_t i;
 
-		uint8_t w = u8g2->getStrWidth("== {title} ==");
+		uint8_t w = u8g2->getStrWidth(PROJECT_STRING);
 		u8g2->setCursor((128-w)/2, 6);
-		u8g2->print("== {title} ==");
+		u8g2->print(PROJECT_STRING);
 		u8g2->drawHLine((128-w)/2-1, 8, w+2);
 
 		for(i = 1; i < stateManager->size; i++)
