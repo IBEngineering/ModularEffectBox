@@ -13,33 +13,31 @@
 #include <stdlib.h>
 #include <stdint.h>
 
+//Amount of connected modules per port
+#define OUTPUTCONNECTIONS	3
+
+/**
+ * What info is needed before allocation:
+ * - prototype (for counts)
+ *(- desired amount of connections per output): currently hardcoded
+ *
+ * The inputs array looks like this: {port, port, port}
+ * The outputs array looks like this: {port0, port0, port0, port1, port1, port1, port2, ... }
+ *   or: {{port0connections}, {port1connections}, {port2connections}}
+ */
 class Module
 {
 public:
-	Module() {
-		id = -1;	//impossible
-		values = new BoundedValue[1];
-		inputs = (uint8_t *)malloc(sizeof(uint8_t));
-		outputs = (uint8_t **)malloc(sizeof(uint8_t));
-		proto = 0;
-	}
-
-	Module(ModuleProto *proto, uint8_t id)
-	{
-		this->proto = proto;
-		this->id = id;
-		values = new BoundedValue[proto->valueCount];
-		inputs = (uint8_t *)malloc(sizeof(uint8_t)*proto->inputCount);
-		outputs = (uint8_t **)malloc(sizeof(uint8_t)*proto->outputCount);
-	}
-
-	Module(ModuleProto *proto, uint8_t id, BoundedValue *values, uint8_t* inputs, uint8_t** outputs);
+	Module();
+	Module(ModuleProto *proto, uint8_t id);
+	Module(ModuleProto *proto, uint8_t id, BoundedValue *values, uint8_t* inputs, uint8_t* outputs);
 
 	ModuleProto *proto;
 	uint8_t id;
 	BoundedValue *values;
 	uint8_t* inputs;		// An array of input ports, each with one link
-	uint8_t** outputs;		// An array of input ports, each with several outputs
+	uint8_t* outputs;		// An array of input ports, each with several outputs,
+							//   but used as a pseudo-multidimensional array because c++
 };
 
 #endif /* MODEL_MODULE_H_ */

@@ -95,27 +95,27 @@ void setup()
 
 	allocateForProtos(4);
 	// IN
-	addProto(new ModuleProto("IN", 0, NULL, 0, 1));
+	addProto(new ModuleProto(ModuleEffectType::Input, "IN", 0, NULL, 0, 1));
 	// FIL
-	addProto(new ModuleProto("FIL", 3, new const char *[3] {"frequency", "resonance", "octave"}, 1, 1));
+	addProto(new ModuleProto(ModuleEffectType::Filter, "FIL", 3, new const char *[3] {"frequency", "resonance", "octave"}, 1, 1));
 	// REV
-	addProto(new ModuleProto("REV", 1, new const char *[1] {"reverb time"}, 1, 1));
+	addProto(new ModuleProto(ModuleEffectType::Reverb, "REV", 1, new const char *[1] {"reverb time"}, 1, 1));
 	// OUT
-	addProto(new ModuleProto("OUT", 0, NULL, 1, 0));
+	addProto(new ModuleProto(ModuleEffectType::Output, "OUT", 0, NULL, 1, 0));
 
 	allocateForModules(4);
 	// IN
 	addModule(0);
-	getModule(0)->outputs[0][0] = 1;
+	getModule(0)->outputs[0] = 1;	// first connection of port 0
 	// FIL
 	addModule(1);
-	getModule(1)->outputs[0][0] = 2;
+	getModule(1)->outputs[0] = 2;	// first connection of port 0
 	getModule(1)->values[0] = BoundedValue(20.0, 1.0, 800.0, 440.0);
 	getModule(1)->values[1] = BoundedValue(0.7, .1, 5.0, 0.7);
 	getModule(1)->values[2] = BoundedValue(0.0, 0.2, 7.0);
 	// REV
 	addModule(2);
-	getModule(2)->outputs[0][0] = 3;
+	getModule(2)->outputs[0] = 3;	// first connection of port 0
 	getModule(2)->values[0] = BoundedValue(0.0, 0.1, 5.0, 0.0);
 	// OUT
 	addModule(3);

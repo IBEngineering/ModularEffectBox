@@ -61,7 +61,7 @@ void EditorState::loop()
 			u8g2->setDrawColor(1);
 		}
 
-		currentModule = getModule(currentModule->outputs[0][0]);
+		currentModule = getModule(currentModule->outputs[0]);
 		x = x+2+w+8;
 		y = 32;
 
@@ -73,7 +73,7 @@ void EditorState::loop()
 			u8g2->setDrawColor(1);
 		}
 
-		currentModule = getModule(currentModule->outputs[0][0]);
+		currentModule = getModule(currentModule->outputs[0]);
 		x = x+2+w+8;
 		y = 32;
 
@@ -85,7 +85,7 @@ void EditorState::loop()
 			u8g2->setDrawColor(1);
 		}
 
-		currentModule = getModule(currentModule->outputs[0][0]);
+		currentModule = getModule(currentModule->outputs[0]);
 		x = x+2+w+8;
 		y = 32;
 
