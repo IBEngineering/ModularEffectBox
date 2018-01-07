@@ -54,43 +54,43 @@ void EditorState::loop()
 		y = 32;	//Middle
 
 		w = drawModule(x,y,currentModule,true);
-		if(currentModule->id == currselect)
+		if(currentModule->id() == currselect)
 		{
 			u8g2->setDrawColor(2);
 			u8g2->drawBox(x+1, y-3, w+1, 7);
 			u8g2->setDrawColor(1);
 		}
 
-		currentModule = getModule(currentModule->outputs[0]);
+		currentModule = getModule(currentModule->outputs()[0]);
 		x = x+2+w+8;
 		y = 32;
 
 		w = drawModule(x,y,currentModule,true);
-		if(currentModule->id == currselect)
+		if(currentModule->id() == currselect)
 		{
 			u8g2->setDrawColor(2);
 			u8g2->drawBox(x+1, y-3, w+1, 7);
 			u8g2->setDrawColor(1);
 		}
 
-		currentModule = getModule(currentModule->outputs[0]);
+		currentModule = getModule(currentModule->outputs()[0]);
 		x = x+2+w+8;
 		y = 32;
 
 		w = drawModule(x,y,currentModule,true);
-		if(currentModule->id == currselect)
+		if(currentModule->id() == currselect)
 		{
 			u8g2->setDrawColor(2);
 			u8g2->drawBox(x+1, y-3, w+1, 7);
 			u8g2->setDrawColor(1);
 		}
 
-		currentModule = getModule(currentModule->outputs[0]);
+		currentModule = getModule(currentModule->outputs()[0]);
 		x = x+2+w+8;
 		y = 32;
 
 		w = drawModule(x,y,currentModule,false);
-		if(currentModule->id == currselect)
+		if(currentModule->id() == currselect)
 		{
 			u8g2->setDrawColor(2);
 			u8g2->drawBox(x+1, y-3, w+1, 7);
@@ -113,15 +113,15 @@ void EditorState::onZoomedIn()
 	u8g2->enableUTF8Print();
 	u8g2->clearBuffer();
 	u8g2->setCursor(1, n+=5);
-	u8g2->print(m->proto->title);
+	u8g2->print(m->title());
 	u8g2->setCursor(1, n+=5);
 	u8g2->print("----");
-	for(i = 0; i < m->proto->valueCount; i++)
+	for(i = 0; i < m->valueCount(); i++)
 	{
 		u8g2->setCursor(1, n+=6);	// Give it an extra pixel for spacing
-		u8g2->print(m->proto->names[i]);
-		u8g2->setCursor(100, n);	//28 px should be enough
-		u8g2->print(m->values[i].value());
+		u8g2->print(m->names()[i]);
+		u8g2->setCursor(99, n);	//28 px should be enough
+		u8g2->print(m->values()[i].value());
 	}
 
 	encc3->r.write(0);
@@ -142,13 +142,13 @@ void EditorState::whileZoomedIn()
 	{
 		u8g2->setDrawColor(2);
 		// Remove last select
-		if(lastselect >= 0 && lastselect < m->proto->valueCount)
+		if(lastselect >= 0 && lastselect < m->valueCount())
 		{
 			u8g2->drawBox(0, 10 + 6*lastselect, 128, 7);
 		}
 
 		// Set new select
-		if(currselect >= 0 && currselect < m->proto->valueCount)
+		if(currselect >= 0 && currselect < m->valueCount())
 		{
 			u8g2->drawBox(0, 10 + 6*currselect, 128, 7);
 		}
@@ -160,7 +160,7 @@ void EditorState::whileZoomedIn()
 	 * letters and draw them again.
 	 */
 
-	if(currselect >= 0 && currselect < m->proto->valueCount)	// is valid?
+	if(currselect >= 0 && currselect < m->valueCount())	// is valid?
 	{
 		/*
 		 * The first button does 1 step
@@ -168,17 +168,17 @@ void EditorState::whileZoomedIn()
 		if(READP(encc1)/4 != 0)
 		{
 			// Set value
-			m->values[currselect] += READP(encc1)/4;
+			m->values()[currselect] += READP(encc1)/4;
 			encc1->r.write(0);
 
 			// Erase area
 //			u8g2->setDrawColor(1);
-			u8g2->drawBox(100, 10 + 6*currselect, 28, 7);
+			u8g2->drawBox(99, 10 + 6*currselect, 28, 7);
 
 			//Draw text in
 			u8g2->setDrawColor(0);
-			u8g2->setCursor(100, 16 + 6*currselect);	//28 px should be enough
-			u8g2->print(m->values[currselect].value());
+			u8g2->setCursor(99, 16 + 6*currselect);	//28 px should be enough
+			u8g2->print(m->values()[currselect].value());
 			u8g2->setDrawColor(1);
 		}
 
@@ -188,17 +188,17 @@ void EditorState::whileZoomedIn()
 		if(READP(encc2)/4 != 0)
 		{
 			// Set value
-			m->values[currselect] += READP(encc2)/4 * 10;
+			m->values()[currselect] += READP(encc2)/4 * 10;
 			encc2->r.write(0);
 
 			// Erase area
 //			u8g2->setDrawColor(1);
-			u8g2->drawBox(100, 10 + 6*currselect, 28, 7);
+			u8g2->drawBox(99, 10 + 6*currselect, 28, 7);
 
 			//Draw text in
 			u8g2->setDrawColor(0);
-			u8g2->setCursor(100, 16 + 6*currselect);	//28 px should be enough
-			u8g2->print(m->values[currselect].value());
+			u8g2->setCursor(99, 16 + 6*currselect);	//28 px should be enough
+			u8g2->print(m->values()[currselect].value());
 			u8g2->setDrawColor(1);
 		}
 	}
@@ -221,7 +221,7 @@ void EditorState::onZoomedOut()
 
 uint8_t EditorState::drawModule(int x, int y, Module *module, bool line)
 {
-	uint8_t w = u8g2->drawStr(x+2, y+3, module->proto->title);
+	uint8_t w = u8g2->drawStr(x+2, y+3, module->title());
 	u8g2->drawFrame(x, y-4, w+3, 9);
 	if(line) u8g2->drawLine(x+3+w, y, x+2+w+7, 32);
 	return w;

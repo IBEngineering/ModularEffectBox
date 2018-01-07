@@ -7,11 +7,12 @@
 #include "model.h"
 #include <stdlib.h>
 #include <stdint.h>
+#include "modules/input.h"
 
 static uint8_t protoCount = 0;
 static uint8_t moduleCount = 0;
 static ModuleProto *protos;
-static Module *modules;
+static Module **modules;
 
 void allocateForProtos(uint8_t size)
 {
@@ -20,7 +21,7 @@ void allocateForProtos(uint8_t size)
 
 void allocateForModules(uint8_t size)
 {
-	modules = new Module[size];
+	modules = new Module*[size];
 }
 
 int addProto(ModuleProto *proto)
@@ -34,18 +35,24 @@ int addProto(ModuleProto *proto)
 
 void addModule(int protoIndex)
 {
-	modules[moduleCount] = *new Module(&protos[protoIndex], moduleCount);
+	modules[moduleCount] = new InputModule(moduleCount);
 	moduleCount++;
 }
 
 void addModule(Module *module)
 {
-	modules[moduleCount] = *module;
+	modules[moduleCount] = module;
 	moduleCount++;
+}
+
+Module *putModule(Module *module)
+{
+	modules[module->id()] = module;
+	return module;
 }
 
 Module *getModule(int index)
 {
-	return &modules[index];
+	return modules[index];
 }
 

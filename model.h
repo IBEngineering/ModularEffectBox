@@ -21,6 +21,7 @@ int addProto(ModuleProto *proto);
 
 void addModule(int protoIndex);
 void addModule(Module *module);
+Module *putModule(Module *module);
 
 Module *getModule(int index);
 

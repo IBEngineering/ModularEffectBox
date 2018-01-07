@@ -15,11 +15,16 @@
 #include <U8g2lib.h>
 #include <Wire.h>
 
+#include "modules/input.h"
+#include "modules/reverb.h"
+#include "modules/filter.h"
+#include "modules/output.h"
+
 #define PIN_CLOCK		14
 #define PIN_DATA		7
 #define PIN_CS			20
 
-// GUItool: begin automatically generated code
+//// GUItool: begin automatically generated code
 AudioInputI2S            i2s1;           //xy=265,455
 AudioAnalyzeRMS          rms1;           //xy=444,354
 AudioFilterStateVariable filter1;        //xy=476,464
@@ -30,7 +35,8 @@ AudioConnection          patchCord2(i2s1, 0, filter1, 0);
 AudioConnection          patchCord3(filter1, 0, i2s2, 0);
 AudioConnection          patchCord4(filter1, 0, i2s2, 1);
 AudioControlSGTL5000     sgtl5000_1;     //xy=325,273
-// GUItool: end automatically generated code
+//// GUItool: end automatically generated code
+
 
 
 #define ENCODER1BUTTON	26
@@ -93,32 +99,27 @@ void setup()
 
 	u8g2.begin();
 
-	allocateForProtos(4);
-	// IN
-	addProto(new ModuleProto(ModuleEffectType::Input, "IN", 0, NULL, 0, 1));
-	// FIL
-	addProto(new ModuleProto(ModuleEffectType::Filter, "FIL", 3, new const char *[3] {"frequency", "resonance", "octave"}, 1, 1));
-	// REV
-	addProto(new ModuleProto(ModuleEffectType::Reverb, "REV", 1, new const char *[1] {"reverb time"}, 1, 1));
-	// OUT
-	addProto(new ModuleProto(ModuleEffectType::Output, "OUT", 0, NULL, 1, 0));
+//	allocateForProtos(4);
+//	// IN
+//	addProto(new ModuleProto(ModuleEffectType::Input, "IN", 0, NULL, 0, 1));
+//	// FIL
+//	addProto(new ModuleProto(ModuleEffectType::Filter, "FIL", 3, new const char *[3] {"frequency", "resonance", "octave"}, 1, 1));
+//	// REV
+//	addProto(new ModuleProto(ModuleEffectType::Reverb, "REV", 1, new const char *[1] {"reverb time"}, 1, 1));
+//	// OUT
+//	addProto(new ModuleProto(ModuleEffectType::Output, "OUT", 0, NULL, 1, 0));
 
+
+	Module *m;
 	allocateForModules(4);
 	// IN
-	addModule(0);
-	getModule(0)->outputs[0] = 1;	// first connection of port 0
-	// FIL
-	addModule(1);
-	getModule(1)->outputs[0] = 2;	// first connection of port 0
-	getModule(1)->values[0] = BoundedValue(20.0, 1.0, 800.0, 440.0);
-	getModule(1)->values[1] = BoundedValue(0.7, .1, 5.0, 0.7);
-	getModule(1)->values[2] = BoundedValue(0.0, 0.2, 7.0);
-	// REV
-	addModule(2);
-	getModule(2)->outputs[0] = 3;	// first connection of port 0
-	getModule(2)->values[0] = BoundedValue(0.0, 0.1, 5.0, 0.0);
-	// OUT
-	addModule(3);
+	m = putModule(new InputModule(0));
+	m->outputs()[0] = 1;
+	m = putModule(new FilterModule(1));
+	m->outputs()[0] = 2;
+	m = putModule(new ReverbModule(2));
+	m->outputs()[0] = 3;
+	m = putModule(new OutputModule(3));
 
 	u8g2.clearBuffer();
 	u8g2.setFont(u8g2_font_4x6_tr);
@@ -139,7 +140,7 @@ void loop()
 	/*
 	 * STATE LOOPS
 	 */
-	stateManager.currentState->loop();
+	stateManager.loop();
 
 //	char buf[40];
 //	sprintf(buf, "%d->%d:%d|%d", encc3.c.lastread(), encc3.c.currentread(), encc3.c.deltaread(), encc3.r.read());
@@ -150,8 +151,8 @@ void loop()
 	u8g2.sendBuffer();
 
 	//After drawing and recieving inputs, update audio
-	filter1.frequency(getModule(1)->values[0].value());
-	filter1.resonance(getModule(1)->values[1].value());
-	filter1.octaveControl(getModule(1)->values[2].value());
-	reverb1.reverbTime(getModule(2)->values[0].value());
+	filter1.frequency(getModule(1)->values()[0].value());
+	filter1.resonance(getModule(1)->values()[1].value());
+	filter1.octaveControl(getModule(1)->values()[2].value());
+	reverb1.reverbTime(getModule(2)->values()[0].value());
 }
