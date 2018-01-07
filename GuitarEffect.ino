@@ -18,26 +18,40 @@
 #include "modules/input.h"
 #include "modules/reverb.h"
 #include "modules/filter.h"
+#include "modules/flange.h"
+#include "modules/waveshape.h"
+#include "modules/legacymixer.h"
 #include "modules/output.h"
 
 #define PIN_CLOCK		14
 #define PIN_DATA		7
 #define PIN_CS			20
 
-//// GUItool: begin automatically generated code
-AudioInputI2S            i2s1;           //xy=265,455
-AudioAnalyzeRMS          rms1;           //xy=444,354
-AudioFilterStateVariable filter1;        //xy=476,464
-AudioEffectReverb        reverb1;        //xy=689,315
-AudioOutputI2S           i2s2;           //xy=821,519
+#define FLANGE_DELAY_LENGTH (6*AUDIO_BLOCK_SAMPLES)
+short delayline[FLANGE_DELAY_LENGTH];
+
+// GUItool: begin automatically generated code
+AudioInputI2S            i2s1;           //xy=227,674
+AudioAnalyzeRMS          rms1;           //xy=407,431
+AudioFilterStateVariable filter1;        //xy=460,634
+AudioEffectFlange        flange1;        //xy=530,532
+AudioEffectWaveshaper    waveshape1;     //xy=539,484
+AudioEffectReverb        reverb1;        //xy=598,622
+AudioMixer4              mixer1;         //xy=788,648
+AudioOutputI2S           i2s2;           //xy=942,627
 AudioConnection          patchCord1(i2s1, 0, rms1, 0);
 AudioConnection          patchCord2(i2s1, 0, filter1, 0);
-AudioConnection          patchCord3(filter1, 0, i2s2, 0);
-AudioConnection          patchCord4(filter1, 0, i2s2, 1);
-AudioControlSGTL5000     sgtl5000_1;     //xy=325,273
-//// GUItool: end automatically generated code
-
-
+AudioConnection          patchCord3(i2s1, 0, mixer1, 3);
+AudioConnection          patchCord4(i2s1, 0, flange1, 0);
+AudioConnection          patchCord5(i2s1, 0, waveshape1, 0);
+AudioConnection          patchCord6(filter1, 0, reverb1, 0);
+AudioConnection          patchCord7(flange1, 0, mixer1, 1);
+AudioConnection          patchCord8(waveshape1, 0, mixer1, 0);
+AudioConnection          patchCord9(reverb1, 0, mixer1, 2);
+AudioConnection          patchCord10(mixer1, 0, i2s2, 1);
+AudioConnection          patchCord11(mixer1, 0, i2s2, 0);
+AudioControlSGTL5000     sgtl5000_1;     //xy=288,350
+// GUItool: end automatically generated code
 
 #define ENCODER1BUTTON	26
 #define ENCODER2BUTTON	29
@@ -57,6 +71,26 @@ StateManager stateManager = StateManager(new ProgramState*[4], 4);
 //MainMenuState mainMenuState = ;
 //DisplayState displayState = ;
 //EditorState editorState = ;
+
+float WAVESHAPE_EXAMPLE[17] = {
+  -0.588,
+  -0.579,
+  -0.549,
+  -0.488,
+  -0.396,
+  -0.320,
+  -0.228,
+  -0.122,
+  0,
+  0.122,
+  0.228,
+  0.320,
+  0.396,
+  0.488,
+  0.549,
+  0.579,
+  0.588
+};
 
 void setup()
 {
@@ -82,10 +116,22 @@ void setup()
 
 	//Set default value for ecnoder 2 we use it for freq
 
+	int i;
+	for(i = 0; i < 17; i ++)
+	{
+		WAVESHAPE_EXAMPLE[i] = chebyshev(i/16.0 * 2.0 - 1.0, 4);
+	}
+
 	encc2.r.write(300/10);
 
 	filter1.frequency(300);
 	filter1.resonance(0.7);
+
+	waveshape1.shape(WAVESHAPE_EXAMPLE, 17);
+
+	flange1.begin(delayline, FLANGE_DELAY_LENGTH, FLANGE_DELAY_LENGTH/4, FLANGE_DELAY_LENGTH/4, .5);
+
+
 
 	//Enable the audio shield, select input, and enable output
 	sgtl5000_1.enable();
@@ -111,19 +157,38 @@ void setup()
 
 
 	Module *m;
-	allocateForModules(4);
+	allocateForModules(7);
 	// IN
 	m = putModule(new InputModule(0));
 	m->outputs()[0] = 1;
+	// FIL
 	m = putModule(new FilterModule(1));
 	m->outputs()[0] = 2;
+	// REV
 	m = putModule(new ReverbModule(2));
 	m->outputs()[0] = 3;
-	m = putModule(new OutputModule(3));
+	// FLN
+	m = putModule(new FlangeModule(3));
+	m->outputs()[0] = 4;
+	// WVS
+	m = putModule(new WaveshapeModule(4));
+	m->outputs()[0] = 5;
+	// MIX
+	m = putModule(new LegacyMixerModule(5));
+	m->outputs()[0] = 6;
+	// OUT
+	m = putModule(new OutputModule(6));
 
 	u8g2.clearBuffer();
 	u8g2.setFont(u8g2_font_4x6_tr);
 	stateManager.setup();
+}
+
+float chebyshev(float x, float n)
+{
+	if(n == 0) return 1;
+	if(n == 1) return x;
+	return 2.0 * x * chebyshev(x, n - 1.0) - chebyshev(x, n - 2.0);
 }
 
 int32_t lasttime = 0;
@@ -154,5 +219,16 @@ void loop()
 	filter1.frequency(getModule(1)->values()[0].value());
 	filter1.resonance(getModule(1)->values()[1].value());
 	filter1.octaveControl(getModule(1)->values()[2].value());
+
 	reverb1.reverbTime(getModule(2)->values()[0].value());
+
+	flange1.voices(
+			FLANGE_DELAY_LENGTH/4,
+			FLANGE_DELAY_LENGTH/4,
+			getModule(3)->values()[2].value());
+
+	mixer1.gain(0, getModule(5)->values()[0].value());
+	mixer1.gain(1, getModule(5)->values()[1].value());
+	mixer1.gain(2, getModule(5)->values()[2].value());
+	mixer1.gain(3, getModule(5)->values()[3].value());
 }

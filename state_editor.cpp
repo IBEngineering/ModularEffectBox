@@ -89,6 +89,30 @@ void EditorState::loop()
 		x = x+2+w+8;
 		y = 32;
 
+		w = drawModule(x,y,currentModule,true);
+		if(currentModule->id() == currselect)
+		{
+			u8g2->setDrawColor(2);
+			u8g2->drawBox(x+1, y-3, w+1, 7);
+			u8g2->setDrawColor(1);
+		}
+
+		currentModule = getModule(currentModule->outputs()[0]);
+		x = x+2+w+8;
+		y = 32;
+
+		w = drawModule(x,y,currentModule,true);
+		if(currentModule->id() == currselect)
+		{
+			u8g2->setDrawColor(2);
+			u8g2->drawBox(x+1, y-3, w+1, 7);
+			u8g2->setDrawColor(1);
+		}
+
+		currentModule = getModule(currentModule->outputs()[0]);
+		x = x+2+w+8;
+		y = 32;
+
 		w = drawModule(x,y,currentModule,false);
 		if(currentModule->id() == currselect)
 		{
