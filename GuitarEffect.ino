@@ -31,27 +31,29 @@
 short delayline[FLANGE_DELAY_LENGTH];
 
 // GUItool: begin automatically generated code
-AudioInputI2S            i2s1;           //xy=227,674
-AudioAnalyzeRMS          rms1;           //xy=407,431
-AudioFilterStateVariable filter1;        //xy=460,634
-AudioEffectFlange        flange1;        //xy=530,532
-AudioEffectWaveshaper    waveshape1;     //xy=539,484
-AudioEffectReverb        reverb1;        //xy=598,622
-AudioMixer4              mixer1;         //xy=788,648
-AudioOutputI2S           i2s2;           //xy=942,627
+AudioInputI2S            i2s1;           //xy=274,733
+AudioAnalyzeRMS          rms1;           //xy=457,262
+AudioFilterStateVariable filter1;        //xy=514,672
+AudioAnalyzeNoteFrequency notefreq1;      //xy=583,457
+AudioEffectWaveshaper    waveshape1;     //xy=592,615
+AudioEffectReverb        reverb1;        //xy=713,676
+AudioSynthWaveform       waveform1;      //xy=739,459
+AudioMixer4              mixer1;         //xy=904,714
+AudioOutputI2S           i2s2;           //xy=1080,636
 AudioConnection          patchCord1(i2s1, 0, rms1, 0);
 AudioConnection          patchCord2(i2s1, 0, filter1, 0);
 AudioConnection          patchCord3(i2s1, 0, mixer1, 3);
-AudioConnection          patchCord4(i2s1, 0, flange1, 0);
-AudioConnection          patchCord5(i2s1, 0, waveshape1, 0);
+AudioConnection          patchCord4(i2s1, 0, waveshape1, 0);
+AudioConnection          patchCord5(i2s1, 0, notefreq1, 0);
 AudioConnection          patchCord6(filter1, 0, reverb1, 0);
-AudioConnection          patchCord7(flange1, 0, mixer1, 1);
-AudioConnection          patchCord8(waveshape1, 0, mixer1, 0);
-AudioConnection          patchCord9(reverb1, 0, mixer1, 2);
+AudioConnection          patchCord7(waveshape1, 0, mixer1, 1);
+AudioConnection          patchCord8(reverb1, 0, mixer1, 2);
+AudioConnection          patchCord9(waveform1, 0, mixer1, 0);
 AudioConnection          patchCord10(mixer1, 0, i2s2, 1);
 AudioConnection          patchCord11(mixer1, 0, i2s2, 0);
 AudioControlSGTL5000     sgtl5000_1;     //xy=288,350
 // GUItool: end automatically generated code
+
 
 #define ENCODER1BUTTON	26
 #define ENCODER2BUTTON	29
@@ -95,7 +97,7 @@ float WAVESHAPE_EXAMPLE[17] = {
 void setup()
 {
 	//First allocate audiomemory
-	AudioMemory(30);
+	AudioMemory(64);
 
 	//Set as inputs
 	pinMode(ENCODER1BUTTON, INPUT);
@@ -109,7 +111,7 @@ void setup()
 
 	//Order states
 	stateManager.states[0] = new MainMenuState(&u8g2, &encc1, &encc2, &encc3, &stateManager);
-	stateManager.states[1] = new DisplayState(&u8g2, &encc1, &encc2, &encc3, &stateManager);
+	stateManager.states[1] = new DisplayState(&u8g2, &rms1, &encc1, &encc2, &encc3, &stateManager);
 	stateManager.states[2] = new EditorState(&u8g2, &encc1, &encc2, &encc3, &stateManager);
 	stateManager.states[3] = new TestState(&u8g2, &encc1, &encc2, &encc3, &stateManager);
 	stateManager.setCurrentState(0);
@@ -129,7 +131,10 @@ void setup()
 
 	waveshape1.shape(WAVESHAPE_EXAMPLE, 17);
 
-	flange1.begin(delayline, FLANGE_DELAY_LENGTH, FLANGE_DELAY_LENGTH/4, FLANGE_DELAY_LENGTH/4, .5);
+	notefreq1.begin(.15);
+	waveform1.begin(.5, 110, WAVEFORM_SAWTOOTH);
+
+//	flange1.begin(delayline, FLANGE_DELAY_LENGTH, FLANGE_DELAY_LENGTH/4, FLANGE_DELAY_LENGTH/4, .5);
 
 
 
@@ -222,13 +227,23 @@ void loop()
 
 	reverb1.reverbTime(getModule(2)->values()[0].value());
 
-	flange1.voices(
-			FLANGE_DELAY_LENGTH/4,
-			FLANGE_DELAY_LENGTH/4,
-			getModule(3)->values()[2].value());
+//	flange1.voices(
+//			FLANGE_DELAY_LENGTH/4,
+//			FLANGE_DELAY_LENGTH/4,
+//			getModule(3)->values()[2].value());
 
 	mixer1.gain(0, getModule(5)->values()[0].value());
 	mixer1.gain(1, getModule(5)->values()[1].value());
 	mixer1.gain(2, getModule(5)->values()[2].value());
 	mixer1.gain(3, getModule(5)->values()[3].value());
+
+	if(notefreq1.available())
+	{
+		waveform1.frequency(notefreq1.read());
+	}
+
+	if(rms1.available())
+	{
+		waveform1.amplitude(rms1.read() * 2);
+	}
 }
