@@ -168,21 +168,25 @@ void setup()
 	m->outputs()[0] = 1;
 	// FIL
 	m = putModule(new FilterModule(1));
+	m->inputs()[0] = 0;
 	m->outputs()[0] = 2;
+	m->outputs()[1] = 3;
+	m->outputs()[2] = 4;
 	// REV
 	m = putModule(new ReverbModule(2));
-	m->outputs()[0] = 3;
-	// FLN
+	m->inputs()[0] = 1;
+//	// FLN
 	m = putModule(new FlangeModule(3));
-	m->outputs()[0] = 4;
-	// WVS
-	m = putModule(new WaveshapeModule(4));
-	m->outputs()[0] = 5;
-	// MIX
-	m = putModule(new LegacyMixerModule(5));
-	m->outputs()[0] = 6;
-	// OUT
-	m = putModule(new OutputModule(6));
+	m->inputs()[0] = 1;
+//	// WVS
+//	m = putModule(new WaveshapeModule(4));
+//	m->outputs()[0] = 5;
+//	// MIX
+//	m = putModule(new LegacyMixerModule(5));
+//	m->outputs()[0] = 6;
+//	// OUT
+	m = putModule(new OutputModule(4));
+	m->inputs()[0] = 1;
 
 	u8g2.clearBuffer();
 	u8g2.setFont(u8g2_font_4x6_tr);
@@ -221,29 +225,29 @@ void loop()
 	u8g2.sendBuffer();
 
 	//After drawing and recieving inputs, update audio
-	filter1.frequency(getModule(1)->values()[0].value());
-	filter1.resonance(getModule(1)->values()[1].value());
-	filter1.octaveControl(getModule(1)->values()[2].value());
-
-	reverb1.reverbTime(getModule(2)->values()[0].value());
+//	filter1.frequency(getModule(1)->values()[0].value());
+//	filter1.resonance(getModule(1)->values()[1].value());
+//	filter1.octaveControl(getModule(1)->values()[2].value());
+//
+//	reverb1.reverbTime(getModule(2)->values()[0].value());
 
 //	flange1.voices(
 //			FLANGE_DELAY_LENGTH/4,
 //			FLANGE_DELAY_LENGTH/4,
 //			getModule(3)->values()[2].value());
 
-	mixer1.gain(0, getModule(5)->values()[0].value());
-	mixer1.gain(1, getModule(5)->values()[1].value());
-	mixer1.gain(2, getModule(5)->values()[2].value());
-	mixer1.gain(3, getModule(5)->values()[3].value());
+//	mixer1.gain(0, getModule(5)->values()[0].value());
+//	mixer1.gain(1, getModule(5)->values()[1].value());
+//	mixer1.gain(2, getModule(5)->values()[2].value());
+//	mixer1.gain(3, getModule(5)->values()[3].value());
 
-	if(notefreq1.available())
-	{
-		waveform1.frequency(notefreq1.read());
-	}
-
-	if(rms1.available())
-	{
-		waveform1.amplitude(rms1.read() * 2);
-	}
+//	if(notefreq1.available())
+//	{
+//		waveform1.frequency(notefreq1.read());
+//	}
+//
+//	if(rms1.available())
+//	{
+//		waveform1.amplitude(rms1.read() * 2);
+//	}
 }

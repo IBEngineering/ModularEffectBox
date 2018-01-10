@@ -10,7 +10,7 @@
 InputModule::InputModule(uint8_t id) {
 	mId = id;
 	mInputs = NULL;
-	mOutputs = new uint8_t[3];
+	mOutputs = new uint8_t[3]	{255, 255, 255};
 }
 
 const char *InputModule::title()	{return "IN";}
@@ -18,3 +18,4 @@ const char **InputModule::names()	{return NULL;}
 uint8_t InputModule::valueCount()	{return 0;}
 uint8_t InputModule::inputCount()	{return 0;}
 uint8_t InputModule::outputCount()	{return 1;}
+void InputModule::createAudio(AudioStream *store)	{store = new AudioInputI2S();}

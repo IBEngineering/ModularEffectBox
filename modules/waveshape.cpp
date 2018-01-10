@@ -10,8 +10,8 @@
 WaveshapeModule::WaveshapeModule(uint8_t id) {
 	mId = id;
 	mValues = NULL;
-	mInputs = new uint8_t[1];
-	mOutputs = new uint8_t[1];
+	mInputs = new uint8_t[1]	{255};
+	mOutputs = new uint8_t[1]	{255};
 }
 
 const char *WaveshapeModule::title()	{return "WVS";}
@@ -19,3 +19,4 @@ const char **WaveshapeModule::names()	{return NULL;}
 uint8_t WaveshapeModule::valueCount()	{return 0;}
 uint8_t WaveshapeModule::inputCount()	{return 1;}
 uint8_t WaveshapeModule::outputCount()	{return 1;}
+void WaveshapeModule::createAudio(AudioStream *store)	{store = new AudioEffectWaveshaper();}

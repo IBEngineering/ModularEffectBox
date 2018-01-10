@@ -14,6 +14,8 @@ void EditorState::setup()
 	WRITEP(encc1, 0);
 	WRITEP(encc2, 0);
 	WRITEP(encc3, 0);
+
+	moduleDrawData = new drawdata_t[getSize()];
 }
 
 void EditorState::loop()
@@ -46,80 +48,18 @@ void EditorState::loop()
 	}
 	else
 	{
+		uint8_t x,y;
 		u8g2->clearBuffer();
-		uint8_t x,y,w;
+		for(uint8_t i = 0; i < getSize(); i++)
+		{
+			moduleDrawData[i].drawn = false;
+		}
 
 		Module *currentModule = getModule(0);	//TODO: hacky
 		x = 0 - READP(encc1)/4 - READP(encc2)/4;
 		y = 32;	//Middle
 
-		w = drawModule(x,y,currentModule,true);
-		if(currentModule->id() == currselect)
-		{
-			u8g2->setDrawColor(2);
-			u8g2->drawBox(x+1, y-3, w+1, 7);
-			u8g2->setDrawColor(1);
-		}
-
-		currentModule = getModule(currentModule->outputs()[0]);
-		x = x+2+w+8;
-		y = 32;
-
-		w = drawModule(x,y,currentModule,true);
-		if(currentModule->id() == currselect)
-		{
-			u8g2->setDrawColor(2);
-			u8g2->drawBox(x+1, y-3, w+1, 7);
-			u8g2->setDrawColor(1);
-		}
-
-		currentModule = getModule(currentModule->outputs()[0]);
-		x = x+2+w+8;
-		y = 32;
-
-		w = drawModule(x,y,currentModule,true);
-		if(currentModule->id() == currselect)
-		{
-			u8g2->setDrawColor(2);
-			u8g2->drawBox(x+1, y-3, w+1, 7);
-			u8g2->setDrawColor(1);
-		}
-
-		currentModule = getModule(currentModule->outputs()[0]);
-		x = x+2+w+8;
-		y = 32;
-
-		w = drawModule(x,y,currentModule,true);
-		if(currentModule->id() == currselect)
-		{
-			u8g2->setDrawColor(2);
-			u8g2->drawBox(x+1, y-3, w+1, 7);
-			u8g2->setDrawColor(1);
-		}
-
-		currentModule = getModule(currentModule->outputs()[0]);
-		x = x+2+w+8;
-		y = 32;
-
-		w = drawModule(x,y,currentModule,true);
-		if(currentModule->id() == currselect)
-		{
-			u8g2->setDrawColor(2);
-			u8g2->drawBox(x+1, y-3, w+1, 7);
-			u8g2->setDrawColor(1);
-		}
-
-		currentModule = getModule(currentModule->outputs()[0]);
-		x = x+2+w+8;
-		y = 32;
-
-		w = drawModule(x,y,currentModule,false);
-		if(currentModule->id() == currselect)
-		{
-			u8g2->setDrawColor(2);
-			u8g2->drawBox(x+1, y-3, w+1, 7);
-			u8g2->setDrawColor(1);
-		}
+		drawModule(x, y, currentModule, true);
 	}
 
 	lastselect = currselect;
@@ -243,16 +183,70 @@ void EditorState::onZoomedOut()
 
 }
 
-uint8_t EditorState::drawModule(int x, int y, Module *module, bool line)
+uint8_t usedOutputs(Module *m)
 {
-	uint8_t w = u8g2->drawStr(x+2, y+3, module->title());
+	uint8_t c = 0;
+	for(uint8_t i = 0; i < m->outputCount(); i++)
+	{
+		if(m->outputs()[i] < getSize())
+		{
+			c++;	// Nice
+		}
+	}
+	return c;
+}
+
+bool hasInput(Module *m, uint8_t t)
+{
+	for(uint8_t i = 0; i < m->inputCount(); i++)
+	{
+		if(m->inputs()[i] == t) return true;
+	}
+	return false;
+}
+
+// FIXME:	line unused
+// FIXME:	return unused
+uint8_t EditorState::drawModule(int x, int y, Module *m, bool line)
+{
+	// Is this necessary?
+	if(moduleDrawData[m->id()].drawn)	return 0;
+
+	// Data
+	uint8_t usesDrawn = 0;
+	uint8_t used = usedOutputs(m);
+
+	// Draw the box
+	uint8_t w = u8g2->drawStr(x+2, y+3, m->title());
 	u8g2->drawFrame(x, y-4, w+3, 9);
-	if(line) u8g2->drawLine(x+3+w, y, x+2+w+7, 32);
+
+	// Register the box
+//	moduleDrawData[m->id()].x = x;
+//	moduleDrawData[m->id()].y = y;
+//	moduleDrawData[m->id()].drawn = true;
+
+	// Draw next box there?
+	if(m->outputCount() == 0) return w;				// Nothing to draw
+	for(uint8_t i = 0; i < m->outputCount(); i++)	// Everything it outputs to
+	{
+		Module *t = getModule(m->outputs()[i]);
+		if(t != NULL && hasInput(t, m->id()))		// Mutual recognition
+		{
+			// Draw next box there
+			if(used == 1)
+			{
+				u8g2->drawLine(x+3+w, y, x+2+w+7, y);
+				drawModule(x+2+w+8, y, t, true);
+			}
+			else
+			{
+				uint8_t yoff = (used*9+used-1)/2-4 -10*usesDrawn;
+				u8g2->drawLine(x+3+w, y, x+2+w+7, y + yoff);
+				drawModule(x+2+w+8, y + yoff, t, true);
+				usesDrawn++;
+			}
+		}
+	}
+
 	return w;
 }
-
-EditorState::~EditorState()
-{
-	// TODO Auto-generated destructor stub
-}
-

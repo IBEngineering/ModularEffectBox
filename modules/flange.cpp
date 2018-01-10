@@ -14,8 +14,8 @@ FlangeModule::FlangeModule(uint8_t id) {
 		BoundedValue(0.0, 1.0, 10.0, 0.0),
 		BoundedValue(0.0, .1, 10.0, 0.0),
 	};
-	mInputs = new uint8_t[1];
-	mOutputs = new uint8_t[1];
+	mInputs = new uint8_t[1]	{255};
+	mOutputs = new uint8_t[1]	{255};
 }
 
 const char *FlangeModule::title()	{return "FLN";}
@@ -23,3 +23,4 @@ const char **FlangeModule::names()	{return new const char *[3] {"offset", "depth
 uint8_t FlangeModule::valueCount()	{return 3;}
 uint8_t FlangeModule::inputCount()	{return 1;}
 uint8_t FlangeModule::outputCount()	{return 1;}
+void FlangeModule::createAudio(AudioStream *store)	{store = new AudioEffectFlange();}

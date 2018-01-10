@@ -19,6 +19,7 @@ public:
 	uint8_t valueCount();
 	uint8_t inputCount();
 	uint8_t outputCount();
+	void createAudio(AudioStream *store);
 };
 
 #endif /* LEGACYMIXER_H_ */
