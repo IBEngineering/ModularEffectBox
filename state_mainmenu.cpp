@@ -7,7 +7,7 @@
 
 #include "state_mainmenu.h"
 
-#define TIME_TILL_SLEEP 3000
+#define TIME_TILL_SLEEP 7777
 
 // This should be declared somewhere else
 #define ibe_med_width 64

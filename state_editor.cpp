@@ -18,18 +18,16 @@ void EditorState::setup()
 	mdd = new drawdata_t[getSize()];
 
 	calculateModule(getModule(0), 32);
+
+	currselect = -1;
+	lastselect = -1;
 }
 
 void EditorState::loop()
 {
 	if(m == NULL) m = getModule(0);	// Get first module to prevent npe
 
-	currselect = -1;	//Impossible
-	int32_t read = READP(encc3)/4;
-	if(read >= 0 && read <= 16)	// Currently hardcoded to 16
-	{
-		currselect = read;
-	}
+	currselect = READP(encc2) / 4;
 
 	if(PRESSEDP(encc1) > 0 || PRESSEDP(encc2) > 0)
 	{
@@ -58,9 +56,32 @@ void EditorState::loop()
 
 		Module *currentModule = getModule(0);	//TODO: hacky
 		drawModule(currentModule);
-	}
+		if(currselect != lastselect)
+		{
+			// Remove last select
+			if(lastselect >= 0 && lastselect < getSize())
+			{
+				drawdata_t dd = mdd[lastselect];
+				u8g2->setDrawColor(2);
+				u8g2->drawBox(dd.x+1, dd.y-2, dd.w-2, 7);
+				u8g2->setDrawColor(1);
+			}
 
-	lastselect = currselect;
+			// Set new select
+			if(currselect >= 0 && currselect < getSize())
+			{
+				drawdata_t dd = mdd[currselect];
+				u8g2->setDrawColor(2);
+				u8g2->drawBox(dd.x+1, dd.y-2, dd.w-2, 7);
+				u8g2->setDrawColor(1);
+			}
+		}
+
+		char buf[40];
+		sprintf(buf, "c:%d, l:%d", currselect, lastselect);
+		u8g2->drawStr(32, 58, buf);
+		lastselect = currselect;
+	}
 }
 
 void EditorState::onZoomedIn()
