@@ -24,7 +24,7 @@ public:
 			StateManager *states)
 			:ProgramState(u8g2, encc1, encc2, encc3, states, "EDITOR")
 	{
-		moduleDrawData = NULL;
+		mdd = NULL;
 	}
 
 	void setup();
@@ -32,20 +32,23 @@ public:
 private:
 	bool zoomed = false;
 	uint8_t lastselect=-1, currselect=-1;
-	drawdata_t *moduleDrawData;
+	drawdata_t *mdd;
 	Module *m = NULL;	// !!!
 
 	void onZoomedIn();
 	void whileZoomedIn();
 	void onZoomedOut();
-	uint8_t drawModule(int x, int y, Module *module, bool line);
+	void drawModule(Module *m);
+	void calculateModule(Module *m, uint8_t py);
 };
 
 struct drawdata
 {
-	bool drawn	= false;
-	uint8_t x	= 0;
-	uint8_t y	= 0;
+	bool calcd	= false;	// Is it calculated?
+	bool drawn	= false;	// Is it drawn?
+	uint8_t x	= 0;		// Drawn x (left)
+	uint8_t y	= 0;		// Drawn y (center)
+	uint8_t w	= 0;		// Frame width (String width + 3)
 };
 
 #endif /* STATE_EDITOR_H_ */

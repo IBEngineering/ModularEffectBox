@@ -10,7 +10,7 @@
 InputModule::InputModule(uint8_t id) {
 	mId = id;
 	mInputs = NULL;
-	mOutputs = new uint8_t[3]	{255, 255, 255};
+	mOutputs = new uint8_t[4]	{255, 255, 255, 255};
 }
 
 const char *InputModule::title()	{return "IN";}

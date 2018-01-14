@@ -15,7 +15,9 @@ void EditorState::setup()
 	WRITEP(encc2, 0);
 	WRITEP(encc3, 0);
 
-	moduleDrawData = new drawdata_t[getSize()];
+	mdd = new drawdata_t[getSize()];
+
+	calculateModule(getModule(0), 32);
 }
 
 void EditorState::loop()
@@ -48,18 +50,14 @@ void EditorState::loop()
 	}
 	else
 	{
-		uint8_t x,y;
 		u8g2->clearBuffer();
 		for(uint8_t i = 0; i < getSize(); i++)
 		{
-			moduleDrawData[i].drawn = false;
+			mdd[i].drawn = false;
 		}
 
 		Module *currentModule = getModule(0);	//TODO: hacky
-		x = 0 - READP(encc1)/4 - READP(encc2)/4;
-		y = 32;	//Middle
-
-		drawModule(x, y, currentModule, true);
+		drawModule(currentModule);
 	}
 
 	lastselect = currselect;
@@ -205,48 +203,146 @@ bool hasInput(Module *m, uint8_t t)
 	return false;
 }
 
-// FIXME:	line unused
-// FIXME:	return unused
-uint8_t EditorState::drawModule(int x, int y, Module *m, bool line)
+/*
+ * py is only used as a reference:
+ * if all inputs have been calculated,
+ * the box will be drawn in the middle.
+ * if not, the box will be drawn where
+ * advised by the previous box.
+ *
+ * Mutual recognition is assumed and irrelevant
+ */
+void EditorState::calculateModule(Module *m, uint8_t py)
 {
 	// Is this necessary?
-	if(moduleDrawData[m->id()].drawn)	return 0;
+	if(mdd[m->id()].calcd)	return;
 
-	// Data
-	uint8_t usesDrawn = 0;
-	uint8_t used = usedOutputs(m);
-
-	// Draw the box
-	uint8_t w = u8g2->drawStr(x+2, y+3, m->title());
-	u8g2->drawFrame(x, y-4, w+3, 9);
-
-	// Register the box
-//	moduleDrawData[m->id()].x = x;
-//	moduleDrawData[m->id()].y = y;
-//	moduleDrawData[m->id()].drawn = true;
-
-	// Draw next box there?
-	if(m->outputCount() == 0) return w;				// Nothing to draw
-	for(uint8_t i = 0; i < m->outputCount(); i++)	// Everything it outputs to
+	uint8_t w = u8g2->getStrWidth(m->title()) + 4;
+	uint8_t maxX = 0;
+	uint8_t sumY = 0;
+	uint8_t ofy = 0;
+	bool allCalc = true;
+	for(uint8_t i = 0; i < m->inputCount(); i++)
 	{
-		Module *t = getModule(m->outputs()[i]);
-		if(t != NULL && hasInput(t, m->id()))		// Mutual recognition
+		if(m->inputs()[i] < getSize())
 		{
-			// Draw next box there
-			if(used == 1)
+			// Does it have all data?
+			if(!mdd[m->inputs()[i]].calcd)	// inputs()[i] is the id in this case
 			{
-				u8g2->drawLine(x+3+w, y, x+2+w+7, y);
-				drawModule(x+2+w+8, y, t, true);
+				calculateModule(getModule(m->inputs()[i]), 255);
+				allCalc = false;
 			}
-			else
+
+			// Calculate
+			if(mdd[m->inputs()[i]].x + mdd[m->inputs()[i]].w + 6 > maxX)
 			{
-				uint8_t yoff = (used*9+used-1)/2-4 -10*usesDrawn;
-				u8g2->drawLine(x+3+w, y, x+2+w+7, y + yoff);
-				drawModule(x+2+w+8, y + yoff, t, true);
-				usesDrawn++;
+				maxX = mdd[m->inputs()[i]].x + mdd[m->inputs()[i]].w + 6;
 			}
+			sumY += mdd[m->inputs()[i]].y;
+			ofy++;
 		}
 	}
 
-	return w;
+	// Write data
+	if(allCalc && ofy > 0)
+	{
+		mdd[m->id()].x = maxX;
+		mdd[m->id()].y = (ofy == 1)? py : sumY/ofy;
+	}
+	else
+	{
+		mdd[m->id()].x = 0;
+		mdd[m->id()].y = py;
+	}
+	mdd[m->id()].w = w;
+	mdd[m->id()].calcd = true;
+
+	// Continue the recursion
+	uint8_t usesCalculated = 0;
+	uint8_t used = usedOutputs(m);
+	for(uint8_t i = 0; i < m->outputCount(); i++)
+	{
+		Module *t = getModule(m->outputs()[i]);
+		if(t != NULL)
+		{
+			if(used == 1)	// Only one output? Put it to the right
+			{
+				calculateModule(t, mdd[m->id()].y);
+			}
+			else	// More outputs? Put them in a stack
+			{
+				uint8_t yoff = (used*9+used-1)/2-4 -10*usesCalculated;
+				calculateModule(t, mdd[m->id()].y + yoff);
+				usesCalculated++;
+			}
+		}
+	}
+}
+
+/*
+ * Mutual recognition is assumed
+ */
+void EditorState::drawModule(Module *m)
+{
+	// Is this necessary?
+	if(mdd[m->id()].drawn)	return;
+
+	// Shorter syntax = 3 bytes more RAM
+	uint8_t x = mdd[m->id()].x + encc1->r.read() + encc2->r.read();
+	uint8_t y = mdd[m->id()].y;
+	uint8_t w = mdd[m->id()].w;
+
+	// Draw the box
+	u8g2->drawStr(x+2, y+3, m->title());
+	u8g2->drawFrame(x, y-4, w, 9);
+
+	// Draw lines away from it + Continue the recursion
+	for(uint8_t i = 0; i < m->outputCount(); i++)	// Everything it outputs to
+	{
+		if(m->outputs()[i] < getSize())
+		{
+			drawdata_t dd = mdd[m->outputs()[i]];
+			u8g2->drawLine(x+w, y, dd.x + encc1->r.read() + encc2->r.read(), dd.y);
+			drawModule(getModule(m->outputs()[i]));
+		}
+	}
+	mdd[m->id()].drawn = true;
+
+//	// Data
+//	uint8_t usesDrawn = 0;
+//	uint8_t used = usedOutputs(m);
+//
+//	// Draw the box
+//	uint8_t w = u8g2->drawStr(x+2, y+3, m->title());
+//	u8g2->drawFrame(x, y-4, w+3, 9);
+//
+//	// Register the box
+////	mdd[m->id()].x = x;
+////	mdd[m->id()].y = y;
+////	mdd[m->id()].drawn = true;
+//
+//	// Draw next box there?
+//	if(m->outputCount() == 0) return w;				// Nothing to draw
+//	for(uint8_t i = 0; i < m->outputCount(); i++)	// Everything it outputs to
+//	{
+//		Module *t = getModule(m->outputs()[i]);
+//		if(t != NULL && hasInput(t, m->id()))		// Mutual recognition
+//		{
+//			// Draw next box there
+//			if(used == 1)
+//			{
+//				u8g2->drawLine(x+3+w, y, x+2+w+7, y);
+//				drawModule(x+2+w+8, y, t, true);
+//			}
+//			else
+//			{
+//				uint8_t yoff = (used*9+used-1)/2-4 -10*usesDrawn;
+//				u8g2->drawLine(x+3+w, y, x+2+w+7, y + yoff);
+//				drawModule(x+2+w+8, y + yoff, t, true);
+//				usesDrawn++;
+//			}
+//		}
+//	}
+//
+//	return w;
 }
