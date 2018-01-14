@@ -70,7 +70,7 @@ void bakeModule(Module *m)
 	m->createAudio(streams[m->id()]);
 
 	// Connect
-	for(int i = 0; i < m->outputCount(); i++)
+	for(int i = 0; i < m->outputCount() * m->paralsCount(); i++)
 	{
 		Module *t = getModule(m->outputs()[i]);
 		if(t->inputCount() > 0 && containsInput(t, m->id()) && connectionCount < mSize*2)	// Mutually recognised

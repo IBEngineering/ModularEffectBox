@@ -19,4 +19,5 @@ const char **WaveshapeModule::names()	{return NULL;}
 uint8_t WaveshapeModule::valueCount()	{return 0;}
 uint8_t WaveshapeModule::inputCount()	{return 1;}
 uint8_t WaveshapeModule::outputCount()	{return 1;}
+uint8_t WaveshapeModule::paralsCount()	{return 1;}
 void WaveshapeModule::createAudio(AudioStream *store)	{store = new AudioEffectWaveshaper();}

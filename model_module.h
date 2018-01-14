@@ -31,6 +31,7 @@ public:
 	// How many ports?
 	virtual uint8_t inputCount() = 0;
 	virtual uint8_t outputCount() = 0;
+	virtual uint8_t paralsCount() = 0;
 
 	// Audio
 	virtual void createAudio(AudioStream *store) = 0;

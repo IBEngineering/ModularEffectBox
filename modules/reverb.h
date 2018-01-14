@@ -19,6 +19,7 @@ public:
 	uint8_t valueCount();
 	uint8_t inputCount();
 	uint8_t outputCount();
+	uint8_t paralsCount();
 	void createAudio(AudioStream *store);
 };
 

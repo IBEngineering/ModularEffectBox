@@ -19,5 +19,6 @@ const char **ReverbModule::names()	{return new const char*[1] {"reverb time"};}
 uint8_t ReverbModule::valueCount()	{return 1;}
 uint8_t ReverbModule::inputCount()	{return 1;}
 uint8_t ReverbModule::outputCount()	{return 1;}
+uint8_t ReverbModule::paralsCount()	{return 1;}
 void ReverbModule::createAudio(AudioStream *store)	{store = new AudioEffectReverb();}
 

@@ -26,5 +26,6 @@ const char **EnvelopeModule::names()	{return new const char*[6] {"delay", "attac
 uint8_t EnvelopeModule::valueCount()	{return 6;}
 uint8_t EnvelopeModule::inputCount()	{return 1;}
 uint8_t EnvelopeModule::outputCount()	{return 1;}
+uint8_t EnvelopeModule::paralsCount()	{return 1;}
 void EnvelopeModule::createAudio(AudioStream *store)	{store = new AudioEffectEnvelope();}
 

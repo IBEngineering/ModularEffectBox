@@ -18,5 +18,6 @@ const char **OutputModule::names()	{return NULL;}
 uint8_t OutputModule::valueCount()	{return 0;}
 uint8_t OutputModule::inputCount()	{return 1;}
 uint8_t OutputModule::outputCount()	{return 0;}
+uint8_t OutputModule::paralsCount()	{return 0;}	// No outputs
 void OutputModule::createAudio(AudioStream *store)	{store = new AudioOutputI2S();}
 

@@ -184,7 +184,7 @@ void EditorState::onZoomedOut()
 uint8_t usedOutputs(Module *m)
 {
 	uint8_t c = 0;
-	for(uint8_t i = 0; i < m->outputCount(); i++)
+	for(uint8_t i = 0; i < m->outputCount() * m->paralsCount(); i++)
 	{
 		if(m->outputs()[i] < getSize())
 		{
@@ -260,7 +260,7 @@ void EditorState::calculateModule(Module *m, uint8_t py)
 	// Continue the recursion
 	uint8_t usesCalculated = 0;
 	uint8_t used = usedOutputs(m);
-	for(uint8_t i = 0; i < m->outputCount(); i++)
+	for(uint8_t i = 0; i < m->outputCount() * m->paralsCount(); i++)
 	{
 		Module *t = getModule(m->outputs()[i]);
 		if(t != NULL)
@@ -297,7 +297,7 @@ void EditorState::drawModule(Module *m)
 	u8g2->drawFrame(x, y-4, w, 9);
 
 	// Draw lines away from it + Continue the recursion
-	for(uint8_t i = 0; i < m->outputCount(); i++)	// Everything it outputs to
+	for(uint8_t i = 0; i < m->outputCount() * m->paralsCount(); i++)	// Everything it outputs to
 	{
 		if(m->outputs()[i] < getSize())
 		{
@@ -307,42 +307,4 @@ void EditorState::drawModule(Module *m)
 		}
 	}
 	mdd[m->id()].drawn = true;
-
-//	// Data
-//	uint8_t usesDrawn = 0;
-//	uint8_t used = usedOutputs(m);
-//
-//	// Draw the box
-//	uint8_t w = u8g2->drawStr(x+2, y+3, m->title());
-//	u8g2->drawFrame(x, y-4, w+3, 9);
-//
-//	// Register the box
-////	mdd[m->id()].x = x;
-////	mdd[m->id()].y = y;
-////	mdd[m->id()].drawn = true;
-//
-//	// Draw next box there?
-//	if(m->outputCount() == 0) return w;				// Nothing to draw
-//	for(uint8_t i = 0; i < m->outputCount(); i++)	// Everything it outputs to
-//	{
-//		Module *t = getModule(m->outputs()[i]);
-//		if(t != NULL && hasInput(t, m->id()))		// Mutual recognition
-//		{
-//			// Draw next box there
-//			if(used == 1)
-//			{
-//				u8g2->drawLine(x+3+w, y, x+2+w+7, y);
-//				drawModule(x+2+w+8, y, t, true);
-//			}
-//			else
-//			{
-//				uint8_t yoff = (used*9+used-1)/2-4 -10*usesDrawn;
-//				u8g2->drawLine(x+3+w, y, x+2+w+7, y + yoff);
-//				drawModule(x+2+w+8, y + yoff, t, true);
-//				usesDrawn++;
-//			}
-//		}
-//	}
-//
-//	return w;
 }

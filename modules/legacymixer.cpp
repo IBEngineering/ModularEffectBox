@@ -24,4 +24,5 @@ const char **LegacyMixerModule::names()		{return new const char*[4] {"gain0", "g
 uint8_t LegacyMixerModule::valueCount()		{return 4;}
 uint8_t LegacyMixerModule::inputCount()		{return 4;}
 uint8_t LegacyMixerModule::outputCount()	{return 1;}
+uint8_t LegacyMixerModule::paralsCount()	{return 1;}
 void LegacyMixerModule::createAudio(AudioStream *store)	{store = new AudioMixer4();}

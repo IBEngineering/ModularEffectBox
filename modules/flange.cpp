@@ -23,4 +23,5 @@ const char **FlangeModule::names()	{return new const char *[3] {"offset", "depth
 uint8_t FlangeModule::valueCount()	{return 3;}
 uint8_t FlangeModule::inputCount()	{return 1;}
 uint8_t FlangeModule::outputCount()	{return 1;}
+uint8_t FlangeModule::paralsCount()	{return 1;}
 void FlangeModule::createAudio(AudioStream *store)	{store = new AudioEffectFlange();}
