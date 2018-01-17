@@ -17,7 +17,7 @@ typedef struct drawdata drawdata_t;
 class EditorState: public ProgramState {
 public:
 	EditorState(
-			U8G2_ST7920_128X64_F_SW_SPI *u8g2,
+			U8G2_ST7920_128X64_F_HW_SPI *u8g2,
 			EncoderCapsule *encc1,
 			EncoderCapsule *encc2,
 			EncoderCapsule *encc3,
@@ -38,6 +38,7 @@ private:
 	void onZoomedIn();
 	void whileZoomedIn();
 	void onZoomedOut();
+	void whileZoomedOut();
 	void drawModule(Module *m);
 	void calculateModule(Module *m, uint8_t py);
 };

@@ -66,8 +66,8 @@ EncoderCapsule encc3 = {Encoder(31,30), EncoderButton(ENCODER3BUTTON)};
 const int myInput = AUDIO_INPUT_LINEIN;
 
 
-U8G2_ST7920_128X64_F_SW_SPI u8g2(U8G2_R2, PIN_CLOCK, PIN_DATA, PIN_CS);
-//U8G2_ST7920_128X64_F_HW_SPI u8g2(U8G2_R2, PIN_CS);
+//U8G2_ST7920_128X64_F_SW_SPI u8g2(U8G2_R2, PIN_CLOCK, PIN_DATA, PIN_CS);
+U8G2_ST7920_128X64_F_HW_SPI u8g2(U8G2_R2, PIN_CS);
 
 StateManager stateManager = StateManager(new ProgramState*[4], 4);
 //MainMenuState mainMenuState = ;

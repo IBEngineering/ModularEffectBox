@@ -18,7 +18,7 @@ private:
 	uint16_t ticks = 1;
 public:
 	DisplayState(
-			U8G2_ST7920_128X64_F_SW_SPI *u8g2,
+			U8G2_ST7920_128X64_F_HW_SPI *u8g2,
 			AudioAnalyzeRMS *rms,
 			EncoderCapsule *encc1,
 			EncoderCapsule *encc2,

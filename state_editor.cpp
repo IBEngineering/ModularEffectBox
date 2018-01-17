@@ -21,20 +21,23 @@ void EditorState::setup()
 
 	currselect = -1;
 	lastselect = -1;
+
+	onZoomedOut();
 }
 
 void EditorState::loop()
 {
+	// FIXME: Why is this?
 	if(m == NULL) m = getModule(0);	// Get first module to prevent npe
 
-	currselect = READP(encc2) / 4;
-
+	// Go out
 	if(PRESSEDP(encc1) > 0 || PRESSEDP(encc2) > 0)
 	{
 		u8g2->clearBuffer();
 		stateManager->setCurrentState(0);
 		return;
 	}
+	// Zoom
 	else if(PRESSEDP(encc3) > 0 && currselect >= 0)
 	{
 		zoomed = !zoomed;
@@ -42,46 +45,8 @@ void EditorState::loop()
 		else		onZoomedOut();
 	}
 
-	if(zoomed)
-	{
-		whileZoomedIn();
-	}
-	else
-	{
-		u8g2->clearBuffer();
-		for(uint8_t i = 0; i < getSize(); i++)
-		{
-			mdd[i].drawn = false;
-		}
-
-		Module *currentModule = getModule(0);	//TODO: hacky
-		drawModule(currentModule);
-		if(currselect != lastselect)
-		{
-			// Remove last select
-			if(lastselect >= 0 && lastselect < getSize())
-			{
-				drawdata_t dd = mdd[lastselect];
-				u8g2->setDrawColor(2);
-				u8g2->drawBox(dd.x+1, dd.y-2, dd.w-2, 7);
-				u8g2->setDrawColor(1);
-			}
-
-			// Set new select
-			if(currselect >= 0 && currselect < getSize())
-			{
-				drawdata_t dd = mdd[currselect];
-				u8g2->setDrawColor(2);
-				u8g2->drawBox(dd.x+1, dd.y-2, dd.w-2, 7);
-				u8g2->setDrawColor(1);
-			}
-		}
-
-		char buf[40];
-		sprintf(buf, "c:%d, l:%d", currselect, lastselect);
-		u8g2->drawStr(32, 58, buf);
-		lastselect = currselect;
-	}
+	// Actual loop
+	zoomed ? whileZoomedIn() : whileZoomedOut();
 }
 
 void EditorState::onZoomedIn()
@@ -199,7 +164,58 @@ void EditorState::whileZoomedIn()
 
 void EditorState::onZoomedOut()
 {
+	u8g2->clearBuffer();	// TODO: check if necessary
+	for(uint8_t i = 0; i < getSize(); i++)
+	{
+		mdd[i].drawn = false;
+	}
 
+	Module *currentModule = getModule(0);	//TODO: hacky
+	drawModule(currentModule);	// Recursive
+}
+
+void EditorState::whileZoomedOut()
+{
+	currselect = -1;	// Invalidate
+	int32_t read = encc3->r.read()/4;
+	if(read >= 0 && read < getSize())
+	{
+		currselect = read;
+	}
+	else if(read >= getSize())
+	{
+		encc3->r.write(getSize()-1);
+	}
+	else
+	{
+		encc3->r.write(0);
+	}
+
+	if(currselect != lastselect)
+		{
+			// Remove last select
+			if(lastselect >= 0 && lastselect < getSize())
+			{
+				drawdata_t dd = mdd[lastselect];
+				u8g2->setDrawColor(2);
+				u8g2->drawBox(dd.x+1, dd.y-3, dd.w-2, 7);
+				u8g2->setDrawColor(1);
+			}
+
+			// Set new select
+			if(currselect >= 0 && currselect < getSize())
+			{
+				drawdata_t dd = mdd[currselect];
+				u8g2->setDrawColor(2);
+				u8g2->drawBox(dd.x+1, dd.y-3, dd.w-2, 7);
+				u8g2->setDrawColor(1);
+			}
+		}
+
+		char buf[40];
+		sprintf(buf, "c:%d, l:%d", currselect, lastselect);
+		u8g2->drawStr(32, 58, buf);
+		lastselect = currselect;
 }
 
 uint8_t usedOutputs(Module *m)

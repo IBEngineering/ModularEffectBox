@@ -20,7 +20,7 @@ public:
 
 	ProgramState();
 	ProgramState(
-			U8G2_ST7920_128X64_F_SW_SPI *u8g2,
+			U8G2_ST7920_128X64_F_HW_SPI *u8g2,
 			EncoderCapsule *encc1,
 			EncoderCapsule *encc2,
 			EncoderCapsule *encc3,
@@ -37,7 +37,7 @@ protected:
 	EncoderCapsule *encc2;
 	EncoderCapsule *encc3;
 	StateManager *stateManager;
-	U8G2_ST7920_128X64_F_SW_SPI *u8g2;
+	U8G2_ST7920_128X64_F_HW_SPI *u8g2;
 };
 
 #endif /* STATE_STATE_H_ */
