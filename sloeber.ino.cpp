@@ -2,7 +2,7 @@
 //This is a automatic generated file
 //Please do not modify this file
 //If you touch this file your change will be overwritten during the next build
-//This file has been generated on 2018-01-14 22:49:34
+//This file has been generated on 2018-01-17 16:47:48
 
 #include "Arduino.h"
 #include <Arduino.h>
@@ -10,6 +10,7 @@
 #include <Bounce.h>
 #include "enc.h"
 #include <Encoder.h>
+#include "gui/gui.h"
 #include <Math.h>
 #include "model.h"
 #include <SPI.h>

@@ -3,6 +3,7 @@
 #include <Bounce.h>
 #include "enc.h"
 #include <Encoder.h>
+#include "gui/gui.h"
 #include <Math.h>
 #include "model.h"
 #include <SPI.h>
@@ -26,6 +27,10 @@
 #define PIN_CLOCK		14
 #define PIN_DATA		7
 #define PIN_CS			20
+
+//U8G2_ST7920_128X64_F_HW_SPI u8g2(U8G2_R2, PIN_CS);
+U8G2_ST7920_128X64_F_SW_SPI u8g2(U8G2_R2, PIN_CLOCK, PIN_DATA, PIN_CS);
+
 
 #define FLANGE_DELAY_LENGTH (6*AUDIO_BLOCK_SAMPLES)
 short delayline[FLANGE_DELAY_LENGTH];
@@ -67,7 +72,7 @@ const int myInput = AUDIO_INPUT_LINEIN;
 
 
 //U8G2_ST7920_128X64_F_SW_SPI u8g2(U8G2_R2, PIN_CLOCK, PIN_DATA, PIN_CS);
-U8G2_ST7920_128X64_F_HW_SPI u8g2(U8G2_R2, PIN_CS);
+//U8G2_ST7920_128X64_F_HW_SPI u8g2(U8G2_R2, PIN_CS);
 
 StateManager stateManager = StateManager(new ProgramState*[4], 4);
 //MainMenuState mainMenuState = ;

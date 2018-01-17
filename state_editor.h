@@ -17,7 +17,7 @@ typedef struct drawdata drawdata_t;
 class EditorState: public ProgramState {
 public:
 	EditorState(
-			U8G2_ST7920_128X64_F_HW_SPI *u8g2,
+			U8G2_ST7920_128X64_F_SW_SPI *u8g2,
 			EncoderCapsule *encc1,
 			EncoderCapsule *encc2,
 			EncoderCapsule *encc3,
@@ -31,7 +31,7 @@ public:
 	void loop();
 private:
 	bool zoomed = false;
-	uint8_t lastselect=-1, currselect=-1;
+	selector_t selI, selO;
 	drawdata_t *mdd;
 	Module *m = NULL;	// !!!
 
