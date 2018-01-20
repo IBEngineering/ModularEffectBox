@@ -15,21 +15,43 @@
 #include <U8g2lib.h>
 #include <Wire.h>
 
+#include "modules/input.h"
+#include "modules/reverb.h"
+#include "modules/filter.h"
+#include "modules/flange.h"
+#include "modules/waveshape.h"
+#include "modules/legacymixer.h"
+#include "modules/output.h"
+
 #define PIN_CLOCK		14
 #define PIN_DATA		7
 #define PIN_CS			20
 
+#define FLANGE_DELAY_LENGTH (6*AUDIO_BLOCK_SAMPLES)
+short delayline[FLANGE_DELAY_LENGTH];
+
 // GUItool: begin automatically generated code
-AudioInputI2S            i2s1;           //xy=265,455
-AudioAnalyzeRMS          rms1;           //xy=444,354
-AudioFilterStateVariable filter1;        //xy=476,464
-AudioEffectReverb        reverb1;        //xy=689,315
-AudioOutputI2S           i2s2;           //xy=821,519
+AudioInputI2S            i2s1;           //xy=274,733
+AudioAnalyzeRMS          rms1;           //xy=457,262
+AudioFilterStateVariable filter1;        //xy=514,672
+AudioAnalyzeNoteFrequency notefreq1;      //xy=583,457
+AudioEffectWaveshaper    waveshape1;     //xy=592,615
+AudioEffectReverb        reverb1;        //xy=713,676
+AudioSynthWaveform       waveform1;      //xy=739,459
+AudioMixer4              mixer1;         //xy=904,714
+AudioOutputI2S           i2s2;           //xy=1080,636
 AudioConnection          patchCord1(i2s1, 0, rms1, 0);
 AudioConnection          patchCord2(i2s1, 0, filter1, 0);
-AudioConnection          patchCord3(filter1, 0, i2s2, 0);
-AudioConnection          patchCord4(filter1, 0, i2s2, 1);
-AudioControlSGTL5000     sgtl5000_1;     //xy=325,273
+AudioConnection          patchCord3(i2s1, 0, mixer1, 3);
+AudioConnection          patchCord4(i2s1, 0, waveshape1, 0);
+AudioConnection          patchCord5(i2s1, 0, notefreq1, 0);
+AudioConnection          patchCord6(filter1, 0, reverb1, 0);
+AudioConnection          patchCord7(waveshape1, 0, mixer1, 1);
+AudioConnection          patchCord8(reverb1, 0, mixer1, 2);
+AudioConnection          patchCord9(waveform1, 0, mixer1, 0);
+AudioConnection          patchCord10(mixer1, 0, i2s2, 1);
+AudioConnection          patchCord11(mixer1, 0, i2s2, 0);
+AudioControlSGTL5000     sgtl5000_1;     //xy=288,350
 // GUItool: end automatically generated code
 
 
@@ -44,18 +66,38 @@ EncoderCapsule encc3 = {Encoder(31,30), EncoderButton(ENCODER3BUTTON)};
 const int myInput = AUDIO_INPUT_LINEIN;
 
 
-U8G2_ST7920_128X64_F_SW_SPI u8g2(U8G2_R2, PIN_CLOCK, PIN_DATA, PIN_CS);
-//U8G2_ST7920_128X64_F_HW_SPI u8g2(U8G2_R2, PIN_CS);
+//U8G2_ST7920_128X64_F_SW_SPI u8g2(U8G2_R2, PIN_CLOCK, PIN_DATA, PIN_CS);
+U8G2_ST7920_128X64_F_HW_SPI u8g2(U8G2_R2, PIN_CS);
 
 StateManager stateManager = StateManager(new ProgramState*[4], 4);
 //MainMenuState mainMenuState = ;
 //DisplayState displayState = ;
 //EditorState editorState = ;
 
+float WAVESHAPE_EXAMPLE[17] = {
+  -0.588,
+  -0.579,
+  -0.549,
+  -0.488,
+  -0.396,
+  -0.320,
+  -0.228,
+  -0.122,
+  0,
+  0.122,
+  0.228,
+  0.320,
+  0.396,
+  0.488,
+  0.549,
+  0.579,
+  0.588
+};
+
 void setup()
 {
 	//First allocate audiomemory
-	AudioMemory(30);
+	AudioMemory(64);
 
 	//Set as inputs
 	pinMode(ENCODER1BUTTON, INPUT);
@@ -69,17 +111,32 @@ void setup()
 
 	//Order states
 	stateManager.states[0] = new MainMenuState(&u8g2, &encc1, &encc2, &encc3, &stateManager);
-	stateManager.states[1] = new DisplayState(&u8g2, &encc1, &encc2, &encc3, &stateManager);
+	stateManager.states[1] = new DisplayState(&u8g2, &rms1, &encc1, &encc2, &encc3, &stateManager);
 	stateManager.states[2] = new EditorState(&u8g2, &encc1, &encc2, &encc3, &stateManager);
 	stateManager.states[3] = new TestState(&u8g2, &encc1, &encc2, &encc3, &stateManager);
 	stateManager.setCurrentState(0);
 
 	//Set default value for ecnoder 2 we use it for freq
 
+	int i;
+	for(i = 0; i < 17; i ++)
+	{
+		WAVESHAPE_EXAMPLE[i] = chebyshev(i/16.0 * 2.0 - 1.0, 4);
+	}
+
 	encc2.r.write(300/10);
 
 	filter1.frequency(300);
 	filter1.resonance(0.7);
+
+	waveshape1.shape(WAVESHAPE_EXAMPLE, 17);
+
+	notefreq1.begin(.15);
+	waveform1.begin(.5, 110, WAVEFORM_SAWTOOTH);
+
+//	flange1.begin(delayline, FLANGE_DELAY_LENGTH, FLANGE_DELAY_LENGTH/4, FLANGE_DELAY_LENGTH/4, .5);
+
+
 
 	//Enable the audio shield, select input, and enable output
 	sgtl5000_1.enable();
@@ -93,36 +150,54 @@ void setup()
 
 	u8g2.begin();
 
-	allocateForProtos(4);
-	// IN
-	addProto(new ModuleProto(ModuleEffectType::Input, "IN", 0, NULL, 0, 1));
-	// FIL
-	addProto(new ModuleProto(ModuleEffectType::Filter, "FIL", 3, new const char *[3] {"frequency", "resonance", "octave"}, 1, 1));
-	// REV
-	addProto(new ModuleProto(ModuleEffectType::Reverb, "REV", 1, new const char *[1] {"reverb time"}, 1, 1));
-	// OUT
-	addProto(new ModuleProto(ModuleEffectType::Output, "OUT", 0, NULL, 1, 0));
+//	allocateForProtos(4);
+//	// IN
+//	addProto(new ModuleProto(ModuleEffectType::Input, "IN", 0, NULL, 0, 1));
+//	// FIL
+//	addProto(new ModuleProto(ModuleEffectType::Filter, "FIL", 3, new const char *[3] {"frequency", "resonance", "octave"}, 1, 1));
+//	// REV
+//	addProto(new ModuleProto(ModuleEffectType::Reverb, "REV", 1, new const char *[1] {"reverb time"}, 1, 1));
+//	// OUT
+//	addProto(new ModuleProto(ModuleEffectType::Output, "OUT", 0, NULL, 1, 0));
 
-	allocateForModules(4);
+
+	Module *m;
+	allocateForModules(7);
 	// IN
-	addModule(0);
-	getModule(0)->outputs[0] = 1;	// first connection of port 0
+	m = putModule(new InputModule(0));
+	m->outputs()[0] = 1;
 	// FIL
-	addModule(1);
-	getModule(1)->outputs[0] = 2;	// first connection of port 0
-	getModule(1)->values[0] = BoundedValue(20.0, 1.0, 800.0, 440.0);
-	getModule(1)->values[1] = BoundedValue(0.7, .1, 5.0, 0.7);
-	getModule(1)->values[2] = BoundedValue(0.0, 0.2, 7.0);
+	m = putModule(new FilterModule(1));
+	m->inputs()[0] = 0;
+	m->outputs()[0] = 2;
+	m->outputs()[1] = 3;
+	m->outputs()[2] = 4;
 	// REV
-	addModule(2);
-	getModule(2)->outputs[0] = 3;	// first connection of port 0
-	getModule(2)->values[0] = BoundedValue(0.0, 0.1, 5.0, 0.0);
-	// OUT
-	addModule(3);
+	m = putModule(new ReverbModule(2));
+	m->inputs()[0] = 1;
+//	// FLN
+	m = putModule(new FlangeModule(3));
+	m->inputs()[0] = 1;
+//	// WVS
+//	m = putModule(new WaveshapeModule(4));
+//	m->outputs()[0] = 5;
+//	// MIX
+//	m = putModule(new LegacyMixerModule(5));
+//	m->outputs()[0] = 6;
+//	// OUT
+	m = putModule(new OutputModule(4));
+	m->inputs()[0] = 1;
 
 	u8g2.clearBuffer();
 	u8g2.setFont(u8g2_font_4x6_tr);
 	stateManager.setup();
+}
+
+float chebyshev(float x, float n)
+{
+	if(n == 0) return 1;
+	if(n == 1) return x;
+	return 2.0 * x * chebyshev(x, n - 1.0) - chebyshev(x, n - 2.0);
 }
 
 int32_t lasttime = 0;
@@ -139,19 +214,44 @@ void loop()
 	/*
 	 * STATE LOOPS
 	 */
-	stateManager.currentState->loop();
+	stateManager.loop();
 
-//	char buf[40];
-//	sprintf(buf, "%d->%d:%d|%d", encc3.c.lastread(), encc3.c.currentread(), encc3.c.deltaread(), encc3.r.read());
-//	u8g2.drawStr(0, 64, buf);
+	char buf[40];
+	sprintf(buf, "%d->%d:%d|%d", encc1.c.lastread(), encc1.c.currentread(), encc1.c.deltaread(), encc1.r.read());
+	u8g2.drawStr(0, 48, buf);
+	sprintf(buf, "%d->%d:%d|%d", encc2.c.lastread(), encc2.c.currentread(), encc2.c.deltaread(), encc2.r.read());
+	u8g2.drawStr(0, 56, buf);
+	sprintf(buf, "%d->%d:%d|%d", encc3.c.lastread(), encc3.c.currentread(), encc3.c.deltaread(), encc3.r.read());
+	u8g2.drawStr(0, 64, buf);
 //	sprintf(buf, "state=%s", stateManager.currentState->title);
 //	u8g2.drawStr(0, 54, buf);
 
 	u8g2.sendBuffer();
 
 	//After drawing and recieving inputs, update audio
-	filter1.frequency(getModule(1)->values[0].value());
-	filter1.resonance(getModule(1)->values[1].value());
-	filter1.octaveControl(getModule(1)->values[2].value());
-	reverb1.reverbTime(getModule(2)->values[0].value());
+//	filter1.frequency(getModule(1)->values()[0].value());
+//	filter1.resonance(getModule(1)->values()[1].value());
+//	filter1.octaveControl(getModule(1)->values()[2].value());
+//
+//	reverb1.reverbTime(getModule(2)->values()[0].value());
+
+//	flange1.voices(
+//			FLANGE_DELAY_LENGTH/4,
+//			FLANGE_DELAY_LENGTH/4,
+//			getModule(3)->values()[2].value());
+
+//	mixer1.gain(0, getModule(5)->values()[0].value());
+//	mixer1.gain(1, getModule(5)->values()[1].value());
+//	mixer1.gain(2, getModule(5)->values()[2].value());
+//	mixer1.gain(3, getModule(5)->values()[3].value());
+
+//	if(notefreq1.available())
+//	{
+//		waveform1.frequency(notefreq1.read());
+//	}
+//
+//	if(rms1.available())
+//	{
+//		waveform1.amplitude(rms1.read() * 2);
+//	}
 }

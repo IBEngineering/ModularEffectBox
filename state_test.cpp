@@ -46,8 +46,8 @@ void TestState::loop()
 	u8g2->clearBuffer();
 	char buf[64];
 	sprintf(buf, "bv: [%0.1f:%0.1f:%0.1f]:%0.1f",
-			getModule(1)->values[0].minimum(), getModule(1)->values[0].stepSize(),
-			getModule(1)->values[0].maximum(), getModule(1)->values[0].value());
+			getModule(1)->values()[0].minimum(), getModule(1)->values()[0].stepSize(),
+			getModule(1)->values()[0].maximum(), getModule(1)->values()[0].value());
 
 	u8g2->drawStr(0, 5, buf);
 }
