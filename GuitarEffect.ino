@@ -11,6 +11,7 @@
 #include "state_editor.h"
 #include "state_mainmenu.h"
 #include "state_test.h"
+#include "stk_pitch_shift.h"
 #include <string.h>
 #include <U8g2lib.h>
 #include <Wire.h>
@@ -21,6 +22,7 @@
 #include "modules/flange.h"
 #include "modules/waveshape.h"
 #include "modules/legacymixer.h"
+#include "modules/pitchshifter.h"
 #include "modules/output.h"
 
 #define PIN_CLOCK		14
@@ -31,28 +33,39 @@
 short delayline[FLANGE_DELAY_LENGTH];
 
 // GUItool: begin automatically generated code
+//AudioInputI2S            i2s1;           //xy=274,733
+//AudioAnalyzeRMS          rms1;           //xy=457,262
+//AudioFilterStateVariable filter1;        //xy=514,672
+//AudioAnalyzeNoteFrequency notefreq1;      //xy=583,457
+//AudioEffectWaveshaper    waveshape1;     //xy=592,615
+//AudioEffectReverb        reverb1;        //xy=713,676
+//AudioSynthWaveform       waveform1;      //xy=739,459
+//AudioMixer4              mixer1;         //xy=904,714
+//AudioOutputI2S           i2s2;           //xy=1080,636
+//AudioConnection          patchCord1(i2s1, 0, rms1, 0);
+//AudioConnection          patchCord2(i2s1, 0, filter1, 0);
+//AudioConnection          patchCord3(i2s1, 0, mixer1, 3);
+//AudioConnection          patchCord4(i2s1, 0, waveshape1, 0);
+//AudioConnection          patchCord5(i2s1, 0, notefreq1, 0);
+//AudioConnection          patchCord6(filter1, 0, reverb1, 0);
+//AudioConnection          patchCord7(waveshape1, 0, mixer1, 1);
+//AudioConnection          patchCord8(reverb1, 0, mixer1, 2);
+//AudioConnection          patchCord9(waveform1, 0, mixer1, 0);
+//AudioConnection          patchCord10(mixer1, 0, i2s2, 1);
+//AudioConnection          patchCord11(mixer1, 0, i2s2, 0);
+//AudioControlSGTL5000     sgtl5000_1;     //xy=288,350
+// GUItool: end automatically generated code
+
 AudioInputI2S            i2s1;           //xy=274,733
 AudioAnalyzeRMS          rms1;           //xy=457,262
-AudioFilterStateVariable filter1;        //xy=514,672
-AudioAnalyzeNoteFrequency notefreq1;      //xy=583,457
-AudioEffectWaveshaper    waveshape1;     //xy=592,615
-AudioEffectReverb        reverb1;        //xy=713,676
-AudioSynthWaveform       waveform1;      //xy=739,459
+//StkPitchShift			 pitchshifter1(128);
 AudioMixer4              mixer1;         //xy=904,714
 AudioOutputI2S           i2s2;           //xy=1080,636
-AudioConnection          patchCord1(i2s1, 0, rms1, 0);
-AudioConnection          patchCord2(i2s1, 0, filter1, 0);
-AudioConnection          patchCord3(i2s1, 0, mixer1, 3);
-AudioConnection          patchCord4(i2s1, 0, waveshape1, 0);
-AudioConnection          patchCord5(i2s1, 0, notefreq1, 0);
-AudioConnection          patchCord6(filter1, 0, reverb1, 0);
-AudioConnection          patchCord7(waveshape1, 0, mixer1, 1);
-AudioConnection          patchCord8(reverb1, 0, mixer1, 2);
-AudioConnection          patchCord9(waveform1, 0, mixer1, 0);
-AudioConnection          patchCord10(mixer1, 0, i2s2, 1);
-AudioConnection          patchCord11(mixer1, 0, i2s2, 0);
+AudioConnection			 patchCord1(i2s1, 0, mixer1, 0);
+//AudioConnection			 patchCord2(i2s1, 0, pitchshifter1, 0);
+//AudioConnection			 patchCord3(pitchshifter1, 0, mixer1, 0);
+AudioConnection			 patchCord4(mixer1, 0, i2s2, 0);
 AudioControlSGTL5000     sgtl5000_1;     //xy=288,350
-// GUItool: end automatically generated code
 
 
 #define ENCODER1BUTTON	26
@@ -126,13 +139,13 @@ void setup()
 
 	encc2.r.write(300/10);
 
-	filter1.frequency(300);
-	filter1.resonance(0.7);
+//	filter1.frequency(300);
+//	filter1.resonance(0.7);
 
-	waveshape1.shape(WAVESHAPE_EXAMPLE, 17);
+//	waveshape1.shape(WAVESHAPE_EXAMPLE, 17);
 
-	notefreq1.begin(.15);
-	waveform1.begin(.5, 110, WAVEFORM_SAWTOOTH);
+//	notefreq1.begin(.15);
+//	waveform1.begin(.5, 110, WAVEFORM_SAWTOOTH);
 
 //	flange1.begin(delayline, FLANGE_DELAY_LENGTH, FLANGE_DELAY_LENGTH/4, FLANGE_DELAY_LENGTH/4, .5);
 
@@ -162,22 +175,23 @@ void setup()
 
 
 	Module *m;
-	allocateForModules(7);
+	allocateForModules(5);
 	// IN
 	m = putModule(new InputModule(0));
 	m->outputs()[0] = 1;
+	m->outputs()[1] = 2;
 	// FIL
-	m = putModule(new FilterModule(1));
+	m = putModule(new PitchShifterModule(1));
 	m->inputs()[0] = 0;
 	m->outputs()[0] = 2;
-	m->outputs()[1] = 3;
-	m->outputs()[2] = 4;
 	// REV
-	m = putModule(new ReverbModule(2));
-	m->inputs()[0] = 1;
+	m = putModule(new LegacyMixerModule(2));
+	m->inputs()[0] = 0;
+	m->inputs()[1] = 1;
+	m->outputs()[0] = 3;
 //	// FLN
-	m = putModule(new FlangeModule(3));
-	m->inputs()[0] = 1;
+//	m = putModule(new FlangeModule(3));
+//	m->inputs()[0] = 1;
 //	// WVS
 //	m = putModule(new WaveshapeModule(4));
 //	m->outputs()[0] = 5;
@@ -185,8 +199,8 @@ void setup()
 //	m = putModule(new LegacyMixerModule(5));
 //	m->outputs()[0] = 6;
 //	// OUT
-	m = putModule(new OutputModule(4));
-	m->inputs()[0] = 1;
+	m = putModule(new OutputModule(3));
+	m->inputs()[0] = 2;
 
 	u8g2.clearBuffer();
 	u8g2.setFont(u8g2_font_4x6_tr);
