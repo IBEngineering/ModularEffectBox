@@ -58,12 +58,12 @@ short delayline[FLANGE_DELAY_LENGTH];
 
 AudioInputI2S            i2s1;           //xy=274,733
 AudioAnalyzeRMS          rms1;           //xy=457,262
-//StkPitchShift			 pitchshifter1(128);
+StkPitchShift			 pitchshifter1(4096);
 AudioMixer4              mixer1;         //xy=904,714
 AudioOutputI2S           i2s2;           //xy=1080,636
 AudioConnection			 patchCord1(i2s1, 0, mixer1, 0);
-//AudioConnection			 patchCord2(i2s1, 0, pitchshifter1, 0);
-//AudioConnection			 patchCord3(pitchshifter1, 0, mixer1, 0);
+AudioConnection			 patchCord2(i2s1, 0, pitchshifter1, 0);
+AudioConnection			 patchCord3(pitchshifter1, 0, mixer1, 0);
 AudioConnection			 patchCord4(mixer1, 0, i2s2, 0);
 AudioControlSGTL5000     sgtl5000_1;     //xy=288,350
 

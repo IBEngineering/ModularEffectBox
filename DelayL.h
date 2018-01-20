@@ -14,6 +14,10 @@ class DelayL
 {
 public:
 
+  DelayL() {
+
+  }
+
   //! Default constructor creates a delay-line with maximum length of 4095 samples and zero delay.
   /*!
     An StkError will be thrown if the delay parameter is less than
