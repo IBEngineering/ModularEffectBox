@@ -3,6 +3,7 @@
 #include <Bounce.h>
 #include "enc.h"
 #include <Encoder.h>
+#include "gui/gui.h"
 #include <Math.h>
 #include "model.h"
 #include <SPI.h>
@@ -28,6 +29,10 @@
 #define PIN_CLOCK		14
 #define PIN_DATA		7
 #define PIN_CS			20
+
+//U8G2_ST7920_128X64_F_HW_SPI u8g2(U8G2_R2, PIN_CS);
+U8G2_ST7920_128X64_F_SW_SPI u8g2(U8G2_R2, PIN_CLOCK, PIN_DATA, PIN_CS);
+
 
 #define FLANGE_DELAY_LENGTH (6*AUDIO_BLOCK_SAMPLES)
 short delayline[FLANGE_DELAY_LENGTH];
@@ -67,7 +72,6 @@ AudioConnection			 patchCord3(pitchshifter1, 0, mixer1, 0);
 AudioConnection			 patchCord4(mixer1, 0, i2s2, 0);
 AudioControlSGTL5000     sgtl5000_1;     //xy=288,350
 
-
 #define ENCODER1BUTTON	26
 #define ENCODER2BUTTON	29
 #define ENCODER3BUTTON	32
@@ -80,32 +84,14 @@ const int myInput = AUDIO_INPUT_LINEIN;
 
 
 //U8G2_ST7920_128X64_F_SW_SPI u8g2(U8G2_R2, PIN_CLOCK, PIN_DATA, PIN_CS);
-U8G2_ST7920_128X64_F_HW_SPI u8g2(U8G2_R2, PIN_CS);
+//U8G2_ST7920_128X64_F_HW_SPI u8g2(U8G2_R2, PIN_CS);
 
 StateManager stateManager = StateManager(new ProgramState*[4], 4);
 //MainMenuState mainMenuState = ;
 //DisplayState displayState = ;
 //EditorState editorState = ;
 
-float WAVESHAPE_EXAMPLE[17] = {
-  -0.588,
-  -0.579,
-  -0.549,
-  -0.488,
-  -0.396,
-  -0.320,
-  -0.228,
-  -0.122,
-  0,
-  0.122,
-  0.228,
-  0.320,
-  0.396,
-  0.488,
-  0.549,
-  0.579,
-  0.588
-};
+float WAVESHAPE_EXAMPLE[257];
 
 void setup()
 {
@@ -132,9 +118,9 @@ void setup()
 	//Set default value for ecnoder 2 we use it for freq
 
 	int i;
-	for(i = 0; i < 17; i ++)
+	for(i = 0; i < 257; i ++)
 	{
-		WAVESHAPE_EXAMPLE[i] = chebyshev(i/16.0 * 2.0 - 1.0, 4);
+		WAVESHAPE_EXAMPLE[i] = chebyshev(i/256.0 * 2.0 - 1.0, 16);
 	}
 
 	encc2.r.write(300/10);
@@ -147,7 +133,7 @@ void setup()
 //	notefreq1.begin(.15);
 //	waveform1.begin(.5, 110, WAVEFORM_SAWTOOTH);
 
-//	flange1.begin(delayline, FLANGE_DELAY_LENGTH, FLANGE_DELAY_LENGTH/4, FLANGE_DELAY_LENGTH/4, .5);
+	flange1.begin(delayline, FLANGE_DELAY_LENGTH, FLANGE_DELAY_LENGTH/4, FLANGE_DELAY_LENGTH/4, .5);
 
 
 
@@ -230,13 +216,13 @@ void loop()
 	 */
 	stateManager.loop();
 
-	char buf[40];
-	sprintf(buf, "%d->%d:%d|%d", encc1.c.lastread(), encc1.c.currentread(), encc1.c.deltaread(), encc1.r.read());
-	u8g2.drawStr(0, 48, buf);
-	sprintf(buf, "%d->%d:%d|%d", encc2.c.lastread(), encc2.c.currentread(), encc2.c.deltaread(), encc2.r.read());
-	u8g2.drawStr(0, 56, buf);
-	sprintf(buf, "%d->%d:%d|%d", encc3.c.lastread(), encc3.c.currentread(), encc3.c.deltaread(), encc3.r.read());
-	u8g2.drawStr(0, 64, buf);
+//	char buf[40];
+//	sprintf(buf, "%d->%d:%d|%d", encc1.c.lastread(), encc1.c.currentread(), encc1.c.deltaread(), encc1.r.read());
+//	u8g2.drawStr(0, 48, buf);
+//	sprintf(buf, "%d->%d:%d|%d", encc2.c.lastread(), encc2.c.currentread(), encc2.c.deltaread(), encc2.r.read());
+//	u8g2.drawStr(0, 56, buf);
+//	sprintf(buf, "%d->%d:%d|%d", encc3.c.lastread(), encc3.c.currentread(), encc3.c.deltaread(), encc3.r.read());
+//	u8g2.drawStr(0, 64, buf);
 //	sprintf(buf, "state=%s", stateManager.currentState->title);
 //	u8g2.drawStr(0, 54, buf);
 
@@ -246,18 +232,18 @@ void loop()
 //	filter1.frequency(getModule(1)->values()[0].value());
 //	filter1.resonance(getModule(1)->values()[1].value());
 //	filter1.octaveControl(getModule(1)->values()[2].value());
-//
+
 //	reverb1.reverbTime(getModule(2)->values()[0].value());
 
-//	flange1.voices(
-//			FLANGE_DELAY_LENGTH/4,
-//			FLANGE_DELAY_LENGTH/4,
-//			getModule(3)->values()[2].value());
+	flange1.voices(
+			FLANGE_DELAY_LENGTH/4,
+			FLANGE_DELAY_LENGTH/4,
+			getModule(2)->values()[2].value());
 
-//	mixer1.gain(0, getModule(5)->values()[0].value());
-//	mixer1.gain(1, getModule(5)->values()[1].value());
-//	mixer1.gain(2, getModule(5)->values()[2].value());
-//	mixer1.gain(3, getModule(5)->values()[3].value());
+	mixer1.gain(0, getModule(3)->values()[0].value());
+	mixer1.gain(1, getModule(3)->values()[1].value());
+	mixer1.gain(2, getModule(3)->values()[2].value());
+	mixer1.gain(3, getModule(3)->values()[3].value());
 
 //	if(notefreq1.available())
 //	{
