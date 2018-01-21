@@ -39,8 +39,8 @@ private:
 	void whileZoomedIn();
 	void onZoomedOut();
 	void whileZoomedOut();
+	void highlightModule(Module *m);
 	void drawModule(Module *m);
-	void calculateModule(Module *m, uint8_t py);
 };
 
 struct drawdata

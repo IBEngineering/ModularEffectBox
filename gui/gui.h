@@ -8,7 +8,7 @@
 #ifndef GUI_H_
 #define GUI_H_
 
-#define GUI_SELECTOR_TYPE uint8_t
+#define GUI_SELECTOR_TYPE int8_t
 
 typedef struct selector	selector_t;
 
