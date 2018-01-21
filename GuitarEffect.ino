@@ -66,10 +66,11 @@ AudioAnalyzeRMS          rms1;           //xy=457,262
 StkPitchShift			 pitchshifter1(4096);
 AudioMixer4              mixer1;         //xy=904,714
 AudioOutputI2S           i2s2;           //xy=1080,636
-AudioConnection			 patchCord1(i2s1, 0, mixer1, 0);
-AudioConnection			 patchCord2(i2s1, 0, pitchshifter1, 0);
-AudioConnection			 patchCord3(pitchshifter1, 0, mixer1, 0);
+AudioConnection			 patchCord1(i2s1, 1, mixer1, 0);
+AudioConnection			 patchCord2(i2s1, 1, pitchshifter1, 0);
+AudioConnection			 patchCord3(pitchshifter1, 0, mixer1, 1);
 AudioConnection			 patchCord4(mixer1, 0, i2s2, 0);
+AudioConnection			 patchCord5(mixer1, 0, i2s2, 1);
 AudioControlSGTL5000     sgtl5000_1;     //xy=288,350
 
 #define ENCODER1BUTTON	26
@@ -91,7 +92,7 @@ StateManager stateManager = StateManager(new ProgramState*[4], 4);
 //DisplayState displayState = ;
 //EditorState editorState = ;
 
-float WAVESHAPE_EXAMPLE[257];
+//float WAVESHAPE_EXAMPLE[257];
 
 void setup()
 {
@@ -117,11 +118,11 @@ void setup()
 
 	//Set default value for ecnoder 2 we use it for freq
 
-	int i;
-	for(i = 0; i < 257; i ++)
-	{
-		WAVESHAPE_EXAMPLE[i] = chebyshev(i/256.0 * 2.0 - 1.0, 16);
-	}
+//	int i;
+//	for(i = 0; i < 257; i ++)
+//	{
+//		WAVESHAPE_EXAMPLE[i] = chebyshev(i/256.0 * 2.0 - 1.0, 16);
+//	}
 
 	encc2.r.write(300/10);
 
@@ -133,7 +134,7 @@ void setup()
 //	notefreq1.begin(.15);
 //	waveform1.begin(.5, 110, WAVEFORM_SAWTOOTH);
 
-	flange1.begin(delayline, FLANGE_DELAY_LENGTH, FLANGE_DELAY_LENGTH/4, FLANGE_DELAY_LENGTH/4, .5);
+//	flange1.begin(delayline, FLANGE_DELAY_LENGTH, FLANGE_DELAY_LENGTH/4, FLANGE_DELAY_LENGTH/4, .5);
 
 
 
@@ -235,15 +236,18 @@ void loop()
 
 //	reverb1.reverbTime(getModule(2)->values()[0].value());
 
-	flange1.voices(
-			FLANGE_DELAY_LENGTH/4,
-			FLANGE_DELAY_LENGTH/4,
-			getModule(2)->values()[2].value());
+//	flange1.voices(
+//			FLANGE_DELAY_LENGTH/4,
+//			FLANGE_DELAY_LENGTH/4,
+//			getModule(2)->values()[2].value());
 
-	mixer1.gain(0, getModule(3)->values()[0].value());
-	mixer1.gain(1, getModule(3)->values()[1].value());
-	mixer1.gain(2, getModule(3)->values()[2].value());
-	mixer1.gain(3, getModule(3)->values()[3].value());
+	pitchshifter1.shift(getModule(1)->values()[0].value());
+
+
+	mixer1.gain(0, getModule(2)->values()[0].value());
+	mixer1.gain(1, getModule(2)->values()[1].value());
+	mixer1.gain(2, getModule(2)->values()[2].value());
+	mixer1.gain(3, getModule(2)->values()[3].value());
 
 //	if(notefreq1.available())
 //	{

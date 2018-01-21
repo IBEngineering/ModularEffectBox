@@ -8,8 +8,7 @@
 #ifndef PITCHSHIFTER_H_
 #define PITCHSHIFTER_H_
 
-#include "../model_module.h"
-#include "../stk_pitch_shift.h"
+#include "../model.h"
 
 class PitchShifterModule: public Module {
 public:

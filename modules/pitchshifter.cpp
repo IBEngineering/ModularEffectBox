@@ -6,11 +6,12 @@
  */
 
 #include "pitchshifter.h"
+//#include "../stk_pitch_shift.h"
 
 PitchShifterModule::PitchShifterModule(uint8_t id) {
 	mId = id;
 	mValues = new BoundedValue[1]	{
-		BoundedValue(-10, 0.1, 10, 5.0)
+		BoundedValue(0.0, 0.01, 10.0, 1.0)
 	};
 	mInputs = new uint8_t[1]	{255};
 	mOutputs = new uint8_t[1]	{255};
@@ -22,4 +23,4 @@ uint8_t PitchShifterModule::valueCount()	{return 1;}
 uint8_t PitchShifterModule::inputCount()	{return 1;}
 uint8_t PitchShifterModule::outputCount()	{return 1;}
 uint8_t PitchShifterModule::paralsCount()	{return 1;}
-void PitchShifterModule::createAudio(AudioStream *store)	{store = new StkPitchShift(128);}
+void PitchShifterModule::createAudio(AudioStream *store)	{} //store = new StkPitchShift(128);

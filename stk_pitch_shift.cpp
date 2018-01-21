@@ -84,8 +84,6 @@ void StkPitchShift::update(void)
 	int i =0;
 	for (i =0; i< AUDIO_BLOCK_SAMPLES; i++) {
 
-	in->data[i] = 0;
-
 		float32_t input = 0.0;
 
 		arm_q15_to_float(&in->data[i], &input, 1);
