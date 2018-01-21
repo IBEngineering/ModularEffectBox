@@ -26,6 +26,7 @@
 
 #include "arm_math.h"
 #include "stk_pitch_shift.h"
+#include "DelayL.h"
 
 
 #define DELAY_SZ 4096
@@ -33,30 +34,33 @@
 static float delayBuf1[DELAY_SZ];
 static float delayBuf2[DELAY_SZ];
 
+static DelayL delayLine0(0.0f, delayBuf1, DELAY_SZ);
+static DelayL delayLine1(0.0f, delayBuf2, DELAY_SZ);
+
 float StkPitchShift::tick( float input )
 {
 	float output;
 	// Calculate the two delay length values, keeping them within the
 	// range 12 to maxDelay-12.
 	delay_[0] += rate_;
-	while ( delay_[0] > maxDelay-12 ) delay_[0] -= delayLength_;
+	while ( delay_[0] > DELAY_SZ-12 ) delay_[0] -= delayLength_;
 	while ( delay_[0] < 12 ) delay_[0] += delayLength_;
 
 	delay_[1] = delay_[0] + halfLength_;
-	while ( delay_[1] > maxDelay-12 ) delay_[1] -= delayLength_;
+	while ( delay_[1] > DELAY_SZ-12 ) delay_[1] -= delayLength_;
 	while ( delay_[1] < 12 ) delay_[1] += delayLength_;
 
 	// Set the new delay line lengths.
-//	delayLine_[0].setDelay( delay_[0] );
-//	delayLine_[1].setDelay( delay_[1] );
+	delayLine0.setDelay( delay_[0] );
+	delayLine1.setDelay( delay_[1] );
 
 	// Calculate a triangular envelope.
 	env_[1] = fabs( ( delay_[0] - halfLength_ + 12 ) * ( 1.0 / (halfLength_ + 12 ) ) );
 	env_[0] = 1.0 - env_[1];
 
 	// Delay input and apply envelope.
-//	output =  env_[0] * delayLine_[0].tick( input );
-//	output += env_[1] * delayLine_[1].tick( input );
+	output =  env_[0] * delayLine0.tick( input );
+	output += env_[1] * delayLine1.tick( input );
 
 	// Compute effect mix and output.
 	output *= effectMix_;
@@ -70,7 +74,6 @@ void StkPitchShift::update(void)
 {
 	audio_block_t *in, *out=NULL;
 	unsigned int channel;
-
 
 	in = receiveWritable(0);
 
@@ -87,8 +90,6 @@ void StkPitchShift::update(void)
 		arm_float_to_q15(&sample, &in->data[i], 1);
 
 	}
-
-
 
 
 	transmit(in);

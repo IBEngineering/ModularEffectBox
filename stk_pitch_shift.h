@@ -29,6 +29,7 @@
 
 #include "Arduino.h"
 #include "AudioStream.h"
+#include "DelayL.h"
 
 class StkPitchShift : public AudioStream
 {
@@ -42,12 +43,14 @@ public:
 		delay_[0] = 12;
 		delay_[1] = maxDelay / 2;
 
-/*
- 		delayLine_[0].setMaximumDelay( maxDelay );
-		delayLine_[0].setDelay( delay_[0] );
-		delayLine_[1].setMaximumDelay( maxDelay );
-		delayLine_[1].setDelay( delay_[1] );
-		*/
+//		delayLine_[0] = new DelayL(1,delayBuf1,4096);
+//		delayLine_[1] = new DelayL(1,delayBuf1,4096);
+//
+// 	//	delayLine_[0].setMaximumDelay( maxDelay );
+//		delayLine_[0]->setDelay( delay_[0] );
+//	//	delayLine_[1].setMaximumDelay( maxDelay );
+//		delayLine_[1]->setDelay( delay_[1] );
+
 		effectMix_ = 0.5;
 		rate_ = 1.0;
 
@@ -78,6 +81,10 @@ private:
 	unsigned long delayLength_;
 	unsigned long halfLength_;
 	float _shift;
+	DelayL * delayLine_[2];
+	float delayBuf1[4096];
+	float delayBuf2[4096];
+
 	audio_block_t *inputQueueArray[2];
 protected:
 	float tick( float input );

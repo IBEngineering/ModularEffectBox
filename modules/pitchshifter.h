@@ -2,15 +2,16 @@
  * pitchshifter.h
  *
  *  Created on: 20 jan. 2018
- *      Author: borgert
+ *      Author: MisterCavespider
  */
 
 #ifndef PITCHSHIFTER_H_
 #define PITCHSHIFTER_H_
 
 #include "../model_module.h"
+#include "../stk_pitch_shift.h"
 
-class PitchShifterModule : public Module {
+class PitchShifterModule: public Module {
 public:
 	PitchShifterModule(uint8_t id);
 
