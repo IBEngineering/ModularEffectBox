@@ -14,7 +14,7 @@
 class MainMenuState: public ProgramState {
 public:
 	MainMenuState(
-			U8G2_ST7920_128X64_F_HW_SPI *u8g2,
+			U8G2_ST7920_128X64_F_SW_SPI *u8g2,
 			EncoderCapsule *encc1,
 			EncoderCapsule *encc2,
 			EncoderCapsule *encc3,

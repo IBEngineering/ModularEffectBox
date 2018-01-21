@@ -19,17 +19,16 @@ void EditorState::setup()
 
 	calculateModule(getModule(0), 32);
 
-	currselect = -1;
-	lastselect = -1;
+	selI.curr = -1;
+	selI.last = -1;
+	selO.curr = -1;
+	selO.last = -1;
 
 	onZoomedOut();
 }
 
 void EditorState::loop()
 {
-	// FIXME: Why is this?
-	if(m == NULL) m = getModule(0);	// Get first module to prevent npe
-
 	// Go out
 	if(PRESSEDP(encc1) > 0 || PRESSEDP(encc2) > 0)
 	{
@@ -38,7 +37,7 @@ void EditorState::loop()
 		return;
 	}
 	// Zoom
-	else if(PRESSEDP(encc3) > 0 && currselect >= 0)
+	else if(PRESSEDP(encc3) > 0)
 	{
 		zoomed = !zoomed;
 		if(zoomed)	onZoomedIn();
@@ -51,9 +50,9 @@ void EditorState::loop()
 
 void EditorState::onZoomedIn()
 {
-	// Update currently selected module
+	// Update currently selected module (in zoomOut)
 	// Also 'locks' it
-	m = getModule(currselect);
+	m = getModule(selO.curr);
 
 	uint8_t n = 0;	// cursor position
 	uint8_t i = 0;	// iterated value
@@ -66,39 +65,53 @@ void EditorState::onZoomedIn()
 	u8g2->print("----");
 	for(i = 0; i < m->valueCount(); i++)
 	{
-		u8g2->setCursor(1, n+=6);	// Give it an extra pixel for spacing
+		u8g2->setCursor(1, n+=6);		// Give it an extra pixel for spacing
 		u8g2->print(m->names()[i]);
-		u8g2->setCursor(99, n);	//28 px should be enough
+		u8g2->setCursor(99, n);			//28 px should be enough
 		u8g2->print(m->values()[i].value());
 	}
 
 	encc3->r.write(0);
 
-	// Make sure to have change
-	currselect = 0;
-	lastselect = -1;
+	// Make sure it's (il)legal
+	selI.curr = -1;
+	selI.curr = -1;
 }
 
+
+/*
+ * Order:
+ * - read curr
+ * - validate
+ * - update highlight
+ * - update value
+ */
 void EditorState::whileZoomedIn()
 {
+	selI.curr = READP(encc3) / 4;
+	if(selI.curr >= m->valueCount())
+	{
+		selI.curr = m->valueCount();
+	}
+
 	/*
 	 * If there's a change in selection,
 	 * deselect the last one and select
 	 * the current one
 	 */
-	if(currselect != lastselect)
+	if(selI.curr != selI.last)
 	{
 		u8g2->setDrawColor(2);
 		// Remove last select
-		if(lastselect >= 0 && lastselect < m->valueCount())
+		if(selI.last >= 0 && selI.last < m->valueCount())
 		{
-			u8g2->drawBox(0, 10 + 6*lastselect, 128, 7);
+			u8g2->drawBox(0, 10 + 6*selI.last, 128, 7);
 		}
 
 		// Set new select
-		if(currselect >= 0 && currselect < m->valueCount())
+		if(selI.curr >= 0 && selI.curr < m->valueCount())
 		{
-			u8g2->drawBox(0, 10 + 6*currselect, 128, 7);
+			u8g2->drawBox(0, 10 + 6*selI.curr, 128, 7);
 		}
 		u8g2->setDrawColor(1);
 	}
@@ -108,47 +121,44 @@ void EditorState::whileZoomedIn()
 	 * letters and draw them again.
 	 */
 
-	if(currselect >= 0 && currselect < m->valueCount())	// is valid?
+	/*
+	 * The first button does 1 step
+	 */
+	if(READP(encc1)/4 != 0)
 	{
-		/*
-		 * The first button does 1 step
-		 */
-		if(READP(encc1)/4 != 0)
-		{
-			// Set value
-			m->values()[currselect] += READP(encc1)/4;
-			encc1->r.write(0);
+		// Set value
+		m->values()[selI.curr] += READP(encc1)/4;
+		encc1->r.write(0);
 
-			// Erase area
+		// Erase area
 //			u8g2->setDrawColor(1);
-			u8g2->drawBox(99, 10 + 6*currselect, 28, 7);
+		u8g2->drawBox(99, 10 + 6*selI.curr, 28, 7);
 
-			//Draw text in
-			u8g2->setDrawColor(0);
-			u8g2->setCursor(99, 16 + 6*currselect);	//28 px should be enough
-			u8g2->print(m->values()[currselect].value());
-			u8g2->setDrawColor(1);
-		}
+		//Draw text in
+		u8g2->setDrawColor(0);
+		u8g2->setCursor(99, 16 + 6*selI.curr);	//28 px should be enough
+		u8g2->print(m->values()[selI.curr].value());
+		u8g2->setDrawColor(1);
+	}
 
-		/*
-		 * The second button does 10 steps
-		 */
-		if(READP(encc2)/4 != 0)
-		{
-			// Set value
-			m->values()[currselect] += READP(encc2)/4 * 10;
-			encc2->r.write(0);
+	/*
+	 * The second button does 10 steps
+	 */
+	if(READP(encc2)/4 != 0)
+	{
+		// Set value
+		m->values()[selI.curr] += READP(encc2)/4 * 10;
+		encc2->r.write(0);
 
-			// Erase area
+		// Erase area
 //			u8g2->setDrawColor(1);
-			u8g2->drawBox(99, 10 + 6*currselect, 28, 7);
+		u8g2->drawBox(99, 10 + 6*selI.curr, 28, 7);
 
-			//Draw text in
-			u8g2->setDrawColor(0);
-			u8g2->setCursor(99, 16 + 6*currselect);	//28 px should be enough
-			u8g2->print(m->values()[currselect].value());
-			u8g2->setDrawColor(1);
-		}
+		//Draw text in
+		u8g2->setDrawColor(0);
+		u8g2->setCursor(99, 16 + 6*selI.curr);	//28 px should be enough
+		u8g2->print(m->values()[selI.curr].value());
+		u8g2->setDrawColor(1);
 	}
 
 	// Only clear a small area for debug
@@ -158,8 +168,10 @@ void EditorState::whileZoomedIn()
 
 	char buf[40];
 
-	sprintf(buf, "c:%d, l:%d", currselect, lastselect);
+	sprintf(buf, "c:%d, l:%d", selI.curr, selI.last);
 	u8g2->drawStr(0, 58, buf);
+
+	selI.last = selI.curr;
 }
 
 void EditorState::onZoomedOut()
@@ -172,15 +184,18 @@ void EditorState::onZoomedOut()
 
 	Module *currentModule = getModule(0);	//TODO: hacky
 	drawModule(currentModule);	// Recursive
+
+	selO.curr = -1;
+	selO.last = -1;
 }
 
 void EditorState::whileZoomedOut()
 {
-	currselect = -1;	// Invalidate
+	selO.curr = -1;	// Invalidate
 	int32_t read = encc3->r.read()/4;
 	if(read >= 0 && read < getSize())
 	{
-		currselect = read;
+		selO.curr = read;
 	}
 	else if(read >= getSize())
 	{
@@ -191,21 +206,21 @@ void EditorState::whileZoomedOut()
 		encc3->r.write(0);
 	}
 
-	if(currselect != lastselect)
+	if(selO.curr != selO.last)
 		{
 			// Remove last select
-			if(lastselect >= 0 && lastselect < getSize())
+			if(selO.last >= 0 && selO.last < getSize())
 			{
-				drawdata_t dd = mdd[lastselect];
+				drawdata_t dd = mdd[selO.last];
 				u8g2->setDrawColor(2);
 				u8g2->drawBox(dd.x+1, dd.y-3, dd.w-2, 7);
 				u8g2->setDrawColor(1);
 			}
 
 			// Set new select
-			if(currselect >= 0 && currselect < getSize())
+			if(selO.curr >= 0 && selO.curr < getSize())
 			{
-				drawdata_t dd = mdd[currselect];
+				drawdata_t dd = mdd[selO.curr];
 				u8g2->setDrawColor(2);
 				u8g2->drawBox(dd.x+1, dd.y-3, dd.w-2, 7);
 				u8g2->setDrawColor(1);
@@ -213,9 +228,9 @@ void EditorState::whileZoomedOut()
 		}
 
 		char buf[40];
-		sprintf(buf, "c:%d, l:%d", currselect, lastselect);
+		sprintf(buf, "c:%d, l:%d", selO.curr, selO.last);
 		u8g2->drawStr(32, 58, buf);
-		lastselect = currselect;
+		selO.last = selO.curr;
 }
 
 uint8_t usedOutputs(Module *m)

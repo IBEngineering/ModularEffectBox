@@ -10,6 +10,7 @@
 #include <Bounce.h>
 #include "enc.h"
 #include <Encoder.h>
+#include "gui/gui.h"
 #include <Math.h>
 #include "model.h"
 #include <SPI.h>
