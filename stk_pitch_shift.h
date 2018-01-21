@@ -81,7 +81,6 @@ private:
 	unsigned long delayLength_;
 	unsigned long halfLength_;
 	float _shift;
-	DelayL * delayLine_[2];
 	float delayBuf1[4096];
 	float delayBuf2[4096];
 

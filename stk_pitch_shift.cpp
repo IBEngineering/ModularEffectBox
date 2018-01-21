@@ -39,7 +39,7 @@ static DelayL delayLine1(0.0f, delayBuf2, DELAY_SZ);
 
 float StkPitchShift::tick( float input )
 {
-	float output;
+	float32_t output= 0;
 	// Calculate the two delay length values, keeping them within the
 	// range 12 to maxDelay-12.
 	delay_[0] += rate_;
@@ -72,20 +72,25 @@ float StkPitchShift::tick( float input )
 
 void StkPitchShift::update(void)
 {
-	audio_block_t *in, *out=NULL;
+	audio_block_t *in;
 	unsigned int channel;
 
 	in = receiveWritable(0);
 
+	if (!in) {
+		return;
+	}
+
 	int i =0;
-	for (i =0; i< 128; i++) {
+	for (i =0; i< AUDIO_BLOCK_SAMPLES; i++) {
 
+	in->data[i] = 0;
 
-		float input = 0;
+		float32_t input = 0.0;
 
 		arm_q15_to_float(&in->data[i], &input, 1);
 
-		float sample = tick(input);
+		float32_t sample = tick(input);
 
 		arm_float_to_q15(&sample, &in->data[i], 1);
 
